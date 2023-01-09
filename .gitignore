@@ -1,2 +1,3 @@
-/nativeBridging/node_modules
 /portalToCurvePool/node_modules
+.env
+.DS_Store

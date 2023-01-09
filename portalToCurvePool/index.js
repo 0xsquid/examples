@@ -1,6 +1,13 @@
 import { Squid } from "@0xsquid/sdk";
 import { ethers } from "ethers";
 
+// Environment
+// add to a file named ".env" to prevent them being uploaded to github
+import * as dotenv from "dotenv";
+dotenv.config()
+const avaxRpcEndpoint = process.env.AVAX_RPC_ENDPOINT;
+const privateKey = process.env.PRIVATE_KEY;
+
 // ABIs
 import erc20Abi from "./abi/erc20.json" assert { type: "json" };
 
@@ -29,10 +36,6 @@ const getSDK = () => {
   });
   return squid;
 };
-
-// env
-const avaxRpcEndpoint = "";
-const privateKey = "";
 
 (async () => {
   // set up your RPC provider and signer
