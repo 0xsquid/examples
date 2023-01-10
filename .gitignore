@@ -1,3 +1,4 @@
 /portalToCurvePool/node_modules
+/stakeOnMoonbeam/node_modules
 .env
 .DS_Store
