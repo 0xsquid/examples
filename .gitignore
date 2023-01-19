@@ -1,5 +1,8 @@
 /portalToCurvePool/node_modules
 /stakeOnMoonbeam/node_modules
 /depositToCosmos/node_modules
+/crossChainSwap/node_modules
+/nativeUsdcTransferWithContractCall/
+/depositToCosmosSunny/
 .env
 .DS_Store
