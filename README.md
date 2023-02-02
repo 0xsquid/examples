@@ -4,6 +4,8 @@ Repository of examples integrating the Squid API, SDK and Widget ✨💜
 
 ## Instructions
 
+Requires `node` and `npm` to be installed
+
 Navigate to the folder you want to try
 `cd crossChainSwap`
 
