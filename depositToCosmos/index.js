@@ -20,7 +20,7 @@ const amount = "50000000000000000";
 
 const getSDK = () => {
   const squid = new Squid({
-    baseUrl: "https://api.0xsquid.com",
+    baseUrl: "https://api.squidrouter.com",
   });
   return squid;
 };

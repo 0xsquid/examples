@@ -32,7 +32,7 @@ const approveEncodeData = usdcContractInterface.encodeFunctionData("approve", [p
 
 const getSDK = () => {
   const squid = new Squid({
-    baseUrl: "https://api.0xsquid.com",
+    baseUrl: "https://api.squidrouter.com",
   });
   return squid;
 };
