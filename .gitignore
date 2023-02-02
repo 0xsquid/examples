@@ -4,6 +4,6 @@
 /crossChainSwap/node_modules
 /nativeUsdcTransferWithContractCall/
 /depositToCosmosV2/
-/buyOnTreasure/node_modules
+/buyNftFromAnyChain/node_modules
 .env
 .DS_Store

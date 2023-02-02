@@ -52,6 +52,8 @@ const getSDK = () => {
   );
 
   // Generate the encoded data to buy the NFT on Treasure
+  // This example buys a MoonRock NFT on Treasure on mainnet
+  // https://trove.treasure.lol/collection/smol-treasures/1
   const treasureMarketplaceInterface = new ethers.utils.Interface(treasureMarketplaceAbi);
   const _buyItemParams = {
     nftAddress: moonrockNftAddress,
@@ -78,6 +80,12 @@ const getSDK = () => {
       1,
       0x00
     ]
+  );
+
+  // Generate the encoded data to send any remaining Magic back to signer's address
+  const transferMagicEncodeData = erc20ContractInterface.encodeFunctionData(
+    "transfer",
+    [signer.address, "0"]
   );
 
   const { route } = await squid.getRoute({
@@ -121,7 +129,18 @@ const getSDK = () => {
           inputPos: 1,
         },
         estimatedGas: "50000",
-      }
+      },
+      {
+        callType: 1,
+        target: magicToken,
+        value: "0",
+        callData: transferMagicEncodeData,
+        payload: {
+          tokenAddress: magicToken,
+          inputPos: 1,
+        },
+        estimatedGas: "50000",
+      },
     ],
   });
 
