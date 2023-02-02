@@ -3,6 +3,7 @@
 /depositToCosmos/node_modules
 /crossChainSwap/node_modules
 /nativeUsdcTransferWithContractCall/
-/depositToCosmosSunny/
+/depositToCosmosV2/
+/buyOnTreasure/node_modules
 .env
 .DS_Store
