@@ -1,6 +1,6 @@
-# 0xsquid/examples
+# Squid examples
 
-Repository of examples integrating the Squid API, SDK and Widget
+Repository of examples integrating the Squid API, SDK and Widget ✨💜
 
 ## Instructions
 
