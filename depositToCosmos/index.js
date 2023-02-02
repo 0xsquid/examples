@@ -16,7 +16,7 @@ const nativeToken = "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE";
 const osmosisUsdc = "uusdc";
 
 // amount of AVAX to send (currently 0.05 AVAX)
-const amount = "50000000000000000";
+const amount = "150000000000000000";
 
 const getSDK = () => {
   const squid = new Squid({

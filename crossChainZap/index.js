@@ -8,6 +8,14 @@ dotenv.config()
 const avaxRpcEndpoint = process.env.AVAX_RPC_ENDPOINT;
 const privateKey = process.env.PRIVATE_KEY;
 
+// Squid call types for multicall
+const SquidCallType = {
+  "DEFAULT": 0,
+  "FULL_TOKEN_BALANCE": 1,
+  "FULL_NATIVE_BALANCE": 2,
+  "COLLECT_TOKEN_BALANCE": 3
+}
+
 // ABIs
 import erc20Abi from "./abi/erc20.json" assert { type: "json" };
 
@@ -58,7 +66,7 @@ const getSDK = () => {
     slippage: 1,
     customContractCalls: [
       {
-        callType: 1,
+        callType: SquidCallType.FULL_TOKEN_BALANCE,
         target: polygonUsdc,
         value: "0",
         callData: approveEncodeData,
@@ -69,7 +77,7 @@ const getSDK = () => {
         estimatedGas: "40000",
       },
       {
-        callType: 1,
+        callType: SquidCallType.FULL_TOKEN_BALANCE,
         target: portalPolygonCurveAxlUsdc,
         value: "0",
         callData: calldataPortalPolygonCurveAxlUsdcIn,

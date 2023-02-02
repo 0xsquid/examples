@@ -13,6 +13,14 @@ import erc1155Abi from "./abi/erc1155.json" assert { type: "json" };
 import erc20Abi from "./abi/erc20.json" assert { type: "json" };
 import treasureMarketplaceAbi from "./abi/TreasureMarketplace.json" assert { type: "json" };
 
+// Squid call types for multicall
+const SquidCallType = {
+  "DEFAULT": 0,
+  "FULL_TOKEN_BALANCE": 1,
+  "FULL_NATIVE_BALANCE": 2,
+  "COLLECT_TOKEN_BALANCE": 3
+}
+
 // addresses and IDs
 const avalancheId = 43114;
 const arbitrumId = 42161;
@@ -98,7 +106,7 @@ const getSDK = () => {
     slippage: 1,
     customContractCalls: [
       {
-        callType: 1,
+        callType: SquidCallType.FULL_TOKEN_BALANCE,
         target: magicToken,
         value: "0",
         callData: approveEncodeData,
@@ -109,7 +117,7 @@ const getSDK = () => {
         estimatedGas: "50000",
       },
       {
-        callType: 0,
+        callType: SquidCallType.DEFAULT,
         target: treasureAddress,
         value: "0",
         callData: buyMoonRockNftEncodeData,
@@ -120,7 +128,7 @@ const getSDK = () => {
         estimatedGas: "80000",
       },
       {
-        callType: 0,
+        callType: SquidCallType.DEFAULT,
         target: moonrockNftAddress,
         value: "0",
         callData: transferNftEncodeData,
@@ -131,7 +139,7 @@ const getSDK = () => {
         estimatedGas: "50000",
       },
       {
-        callType: 1,
+        callType: SquidCallType.FULL_TOKEN_BALANCE,
         target: magicToken,
         value: "0",
         callData: transferMagicEncodeData,
