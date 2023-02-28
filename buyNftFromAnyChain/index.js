@@ -159,5 +159,14 @@ const getSDK = () => {
   const txReceipt = await tx.wait();
 
   const axelarScanLink = "https://axelarscan.io/gmp/" + txReceipt.transactionHash;
-  console.log("Finished! Please check axelarscan for more details: ", axelarScanLink);
+  console.log("Finished! Please check Axelarscan for more details: ", axelarScanLink, "\n");
+
+  console.log("Track status at: https://api.squidrouter.com/v1/status?transactionId=" + txReceipt.transactionHash, "\n");
+  
+  // It's best to wait a few seconds before checking the status
+  // const status = await squid.getStatus({
+  //   transactionId: txReceipt.transactionHash
+  // });
+
+  // console.log("Status: ", status);
 })();
