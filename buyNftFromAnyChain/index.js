@@ -29,7 +29,7 @@ const squidMulticall = "0x4fd39C9E151e50580779bd04B1f7eCc310079fd3";
 const magicToken = "0x539bdE0d7Dbd336b79148AA742883198BBF60342";
 const treasureAddress = "0x09986b4e255b3c548041a30a2ee312fe176731c2"; // treasure contract
 const moonrockNftAddress = "0xc5295c6a183f29b7c962df076819d44e0076860e";
-const moonrockOwner = "0x4F4Eb84ff3F237B60C6686e02A20F5DC62259CA7";
+const moonrockOwner = "0x9aF77A9a0a5Fa21FEC567bEFA6765187F1A3d762";
 
 // amount of AVAX to send (currently 0.05 AVAX)
 const amount = "50000000000000000";
@@ -68,7 +68,7 @@ const getSDK = () => {
     tokenId: 1,
     owner: moonrockOwner,
     quantity: 1,
-    maxPricePerItem: "259900000000000000",
+    maxPricePerItem: "150000000000000000",
     paymentToken: magicToken,
     usinEth: false
   };
