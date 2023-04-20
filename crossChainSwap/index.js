@@ -12,7 +12,7 @@ const privateKey = process.env.PRIVATE_KEY;
 const avalancheId = 43114;
 const polygonChainId = 137;
 const nativeToken = "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE";
-const polygonDai = "0x8f3Cf7ad23Cd3CaDbD9735AFf958023239c6A063";
+const polygonUsdc = "0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174";
 
 // amount of AVAX to send (currently 0.01 AVAX (~$0.10))
 const amount = "10000000000000000";
@@ -41,7 +41,7 @@ const getSDK = () => {
     fromToken: nativeToken,
     fromAmount: amount,
     toChain: polygonChainId,
-    toToken: polygonDai,
+    toToken: polygonUsdc,
     slippage: 1,
     customContractCalls: [],
   });
