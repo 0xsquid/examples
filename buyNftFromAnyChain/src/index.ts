@@ -29,10 +29,10 @@ const squidMulticall = "0x4fd39C9E151e50580779bd04B1f7eCc310079fd3";
 const magicToken = "0x539bdE0d7Dbd336b79148AA742883198BBF60342";
 const treasureAddress = "0x09986b4e255b3c548041a30a2ee312fe176731c2"; // treasure contract
 const moonrockNftAddress = "0xc5295c6a183f29b7c962df076819d44e0076860e";
-const moonrockOwner = "0x9aF77A9a0a5Fa21FEC567bEFA6765187F1A3d762";
+const moonrockOwner = "0xa5c53eb116EC0CE355D8be38b0EB424ce520A4db";
 
 // amount of AVAX to send (currently 0.05 AVAX)
-const amount = "50000000000000000";
+const amount = "30000000000000000";
 
 const getSDK = () => {
   const squid = new Squid({
@@ -71,7 +71,7 @@ const getSDK = () => {
     tokenId: 1,
     owner: moonrockOwner,
     quantity: 1,
-    maxPricePerItem: "150000000000000000",
+    maxPricePerItem: "990000000000000000",
     paymentToken: magicToken,
     usinEth: false,
   };
@@ -136,7 +136,7 @@ const getSDK = () => {
         estimatedGas: "50000",
       },
       {
-        callType: SquidCallType.FULL_TOKEN_BALANCE,
+        callType: SquidCallType.FULL_TOKEN_BALANCE, // transfer any remaining MAGIC to the user's account
         target: magicToken,
         value: "0",
         callData: transferMagicEncodeData,
@@ -164,7 +164,7 @@ const getSDK = () => {
   );
 
   console.log(
-    "Track status at: https://api.squidrouter.com/v1/status?transactionId=" +
+    "Track status via API call to: https://api.squidrouter.com/v1/status?transactionId=" +
       txReceipt.transactionHash,
     "\n"
   );

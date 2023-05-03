@@ -68,7 +68,7 @@ const getSDK = () => {
   );
 
   console.log(
-    "Track status at: https://api.squidrouter.com/v1/status?transactionId=" +
+    "Track status via API call to: https://api.squidrouter.com/v1/status?transactionId=" +
       txReceipt.transactionHash,
     "\n"
   );
