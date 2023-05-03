@@ -1,5 +1,5 @@
-import { Squid } from "@0xsquid/sdk";
 import { ethers } from "ethers";
+import { Squid } from "@0xsquid/sdk";
 
 // Environment
 // add to a file named ".env" to prevent them being uploaded to github
@@ -44,23 +44,37 @@ const getSDK = () => {
     toToken: polygonUsdc,
     slippage: 1,
     customContractCalls: [],
+    // receiveGasOnDestination: true,
   });
 
-  const tx = await squid.executeRoute({
+  console.log(route.estimate.toAmount);
+
+  const tx = (await squid.executeRoute({
     signer,
     route,
-  });
+  })) as ethers.providers.TransactionResponse;
   const txReceipt = await tx.wait();
 
-  const axelarScanLink = "https://axelarscan.io/gmp/" + txReceipt.transactionHash;
-  console.log("Finished! Please check Axelarscan for more details: ", axelarScanLink, "\n");
+  const axelarScanLink =
+    "https://axelarscan.io/gmp/" + txReceipt.transactionHash;
+  console.log(
+    "Finished! Please check Axelarscan for more details: ",
+    axelarScanLink,
+    "\n"
+  );
 
-  console.log("Track status at: https://api.squidrouter.com/v1/status?transactionId=" + txReceipt.transactionHash, "\n");
-  
+  console.log(
+    "Track status at: https://api.squidrouter.com/v1/status?transactionId=" +
+      txReceipt.transactionHash,
+    "\n"
+  );
+
   // It's best to wait a few seconds before checking the status
-  // const status = await squid.getStatus({
-  //   transactionId: txReceipt.transactionHash
-  // });
+  await new Promise((resolve) => setTimeout(resolve, 5000));
 
-  // console.log("Status: ", status);
+  const status = await squid.getStatus({
+    transactionId: txReceipt.transactionHash,
+  });
+
+  console.log("Status: ", status);
 })();

@@ -10,12 +10,12 @@ Navigate to the folder you want to try
 `cd crossChainSwap`
 
 Install packages
-`npm install`
+`yarn install`
 
 Copy the .env.example to a file named .env in the same directory, fill in your values. These will not be committed, since .env is in the .gitignore file.
 
 Run index.js
-`node index.js`
+`yarn start`
 
 ## How to approach this
 

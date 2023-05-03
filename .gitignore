@@ -1,9 +1,7 @@
-/crossChainZap/node_modules
-/stakeOnMoonbeam/node_modules
+/stakeFromAnyChain/node_modules
 /depositToCosmos/node_modules
 /crossChainSwap/node_modules
-/nativeUsdcTransferWithContractCall/
-/depositToCosmosV2/
 /buyNftFromAnyChain/node_modules
+/buyZoraNftFromAnyChain
 .env
 .DS_Store

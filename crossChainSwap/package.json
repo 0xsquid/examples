@@ -1,20 +1,10 @@
 {
-  "name": "portaltocurvepool",
-  "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "author": "",
-  "license": "ISC",
-  "dependencies": {
-    "@0xsquid/sdk": "^1.3.3-beta.0",
-    "dotenv": "^16.0.3",
-    "ethers": "^5.7.2"
-  },
-  "devDependencies": {
-    "prettier": "^2.8.1"
-  },
-  "type": "module"
+    "scripts": {
+        "start": "ts-node src/index.ts"
+    },
+    "dependencies": {
+        "@0xsquid/sdk": "^1.4.1",
+        "dotenv": "^16.0.3",
+        "ethers": "^5.7.2"
+    }
 }

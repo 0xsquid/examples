@@ -15,8 +15,8 @@ const osmosisId = "osmosis-1";
 const nativeToken = "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE";
 const osmosisUsdc = "uusdc";
 
-// amount of AVAX to send (currently 0.05 AVAX)
-const amount = "150000000000000000";
+// amount of AVAX to send (currently 0.1 AVAX)
+const amount = "100000000000000000";
 
 const getSDK = () => {
   const squid = new Squid({
@@ -46,20 +46,38 @@ const getSDK = () => {
     slippage: 1,
   });
 
-  const tx = await squid.executeRoute({
+  console.log(
+    "Cross chain fee costs for this route: ",
+    route.estimate.feeCosts
+  );
+
+  const tx = (await squid.executeRoute({
     signer,
     route,
-  });
+  })) as ethers.providers.TransactionResponse;
 
   const txReceipt = await tx.wait();
 
-  console.log("Finished! Please check Axelarscan for more details: ", axelarScanLink, "\n");
+  const axelarScanLink =
+    "https://axelarscan.io/transfer/" + txReceipt.transactionHash;
 
-  console.log("Track status at: https://api.squidrouter.com/v1/status?transactionId=" + txReceipt.transactionHash, "\n");
-  
-  // It's best to wait a few seconds before checking the status
+  console.log(
+    "Finished! Please check Axelarscan for more details: ",
+    axelarScanLink,
+    "\n"
+  );
+
+  console.log(
+    "Track status at: https://api.squidrouter.com/v1/status?transactionId=" +
+      txReceipt.transactionHash,
+    "\n"
+  );
+
+  // // It's best to wait a few seconds before checking the status
+  await new Promise((resolve) => setTimeout(resolve, 5000));
+
   const status = await squid.getStatus({
-    transactionId: txReceipt.transactionHash
+    transactionId: txReceipt.transactionHash,
   });
 
   console.log("Status: ", status);

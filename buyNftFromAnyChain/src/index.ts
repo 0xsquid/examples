@@ -9,17 +9,17 @@ const avaxRpcEndpoint = process.env.AVAX_RPC_ENDPOINT;
 const privateKey = process.env.PRIVATE_KEY;
 
 // ABIs
-import erc1155Abi from "./abi/erc1155.json" assert { type: "json" };
-import erc20Abi from "./abi/erc20.json" assert { type: "json" };
-import treasureMarketplaceAbi from "./abi/TreasureMarketplace.json" assert { type: "json" };
+import erc1155Abi from "../abi/erc1155Abi";
+import erc20Abi from "../abi/erc20Abi";
+import treasureMarketplaceAbi from "../abi/treasureMarketplaceAbi";
 
 // Squid call types for multicall
 const SquidCallType = {
-  "DEFAULT": 0,
-  "FULL_TOKEN_BALANCE": 1,
-  "FULL_NATIVE_BALANCE": 2,
-  "COLLECT_TOKEN_BALANCE": 3
-}
+  DEFAULT: 0,
+  FULL_TOKEN_BALANCE: 1,
+  FULL_NATIVE_BALANCE: 2,
+  COLLECT_TOKEN_BALANCE: 3,
+};
 
 // addresses and IDs
 const avalancheId = 43114;
@@ -45,6 +45,7 @@ const getSDK = () => {
   // set up your RPC provider and signer
   const provider = new ethers.providers.JsonRpcProvider(avaxRpcEndpoint);
   const signer = new ethers.Wallet(privateKey, provider);
+  console.log("Signer address: ", signer.address);
 
   // instantiate the SDK
   const squid = getSDK();
@@ -62,7 +63,9 @@ const getSDK = () => {
   // Generate the encoded data to buy the NFT on Treasure
   // This example buys a MoonRock NFT on Treasure on mainnet
   // https://trove.treasure.lol/collection/smol-treasures/1
-  const treasureMarketplaceInterface = new ethers.utils.Interface(treasureMarketplaceAbi);
+  const treasureMarketplaceInterface = new ethers.utils.Interface(
+    treasureMarketplaceAbi
+  );
   const _buyItemParams = {
     nftAddress: moonrockNftAddress,
     tokenId: 1,
@@ -70,24 +73,18 @@ const getSDK = () => {
     quantity: 1,
     maxPricePerItem: "150000000000000000",
     paymentToken: magicToken,
-    usinEth: false
+    usinEth: false,
   };
-  const buyMoonRockNftEncodeData = treasureMarketplaceInterface.encodeFunctionData(
-    "buyItems", 
-    [[_buyItemParams]]
-  );
+  const buyMoonRockNftEncodeData =
+    treasureMarketplaceInterface.encodeFunctionData("buyItems", [
+      [_buyItemParams],
+    ]);
 
   // Generate the encoded data to transfer the NFT to signer's address
   const erc1155Interface = new ethers.utils.Interface(erc1155Abi);
   const transferNftEncodeData = erc1155Interface.encodeFunctionData(
     "safeTransferFrom",
-    [
-      squidMulticall,
-      signer.address,
-      1,
-      1,
-      0x00
-    ]
+    [squidMulticall, signer.address, 1, 1, 0x00]
   );
 
   // Generate the encoded data to send any remaining Magic back to signer's address
@@ -152,21 +149,32 @@ const getSDK = () => {
     ],
   });
 
-  const tx = await squid.executeRoute({
+  const tx = (await squid.executeRoute({
     signer,
     route,
-  });
+  })) as ethers.providers.TransactionResponse;
   const txReceipt = await tx.wait();
 
-  const axelarScanLink = "https://axelarscan.io/gmp/" + txReceipt.transactionHash;
-  console.log("Finished! Please check Axelarscan for more details: ", axelarScanLink, "\n");
+  const axelarScanLink =
+    "https://axelarscan.io/gmp/" + txReceipt.transactionHash;
+  console.log(
+    "Finished! Please check Axelarscan for more details: ",
+    axelarScanLink,
+    "\n"
+  );
 
-  console.log("Track status at: https://api.squidrouter.com/v1/status?transactionId=" + txReceipt.transactionHash, "\n");
-  
+  console.log(
+    "Track status at: https://api.squidrouter.com/v1/status?transactionId=" +
+      txReceipt.transactionHash,
+    "\n"
+  );
+
   // It's best to wait a few seconds before checking the status
-  // const status = await squid.getStatus({
-  //   transactionId: txReceipt.transactionHash
-  // });
+  await new Promise((resolve) => setTimeout(resolve, 5000));
 
-  // console.log("Status: ", status);
+  const status = await squid.getStatus({
+    transactionId: txReceipt.transactionHash,
+  });
+
+  console.log("Status: ", status);
 })();
