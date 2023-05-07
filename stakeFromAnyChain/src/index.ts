@@ -62,6 +62,7 @@ const getSDK = () => {
     toChain: moonbeamId,
     toToken: nativeToken,
     slippage: 1,
+    // enableExpress: false, // default is true on all chains except Ethereum
     customContractCalls: [
       {
         callType: SquidCallType.FULL_NATIVE_BALANCE,

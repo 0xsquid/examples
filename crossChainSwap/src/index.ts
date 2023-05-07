@@ -44,6 +44,7 @@ const getSDK = () => {
     toToken: polygonUsdc,
     slippage: 1,
     customContractCalls: [],
+    // enableExpress: false, // default is true on all chains except Ethereum
     // receiveGasOnDestination: true,
   });
 

@@ -101,6 +101,7 @@ const getSDK = () => {
     toChain: arbitrumId,
     toToken: magicToken,
     slippage: 1,
+    // enableExpress: false, // default is true on all chains except Ethereum
     customContractCalls: [
       {
         callType: SquidCallType.FULL_TOKEN_BALANCE,
