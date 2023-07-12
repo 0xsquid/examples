@@ -3,5 +3,7 @@
 /crossChainSwap/node_modules
 /buyNftFromAnyChain/node_modules
 /buyZoraNftFromAnyChain
+/sequesterCarbonFromAnyChain
+/stakeFromAnyChainPinjam/node_modules
 .env
 .DS_Store
