@@ -1,7 +1,4 @@
-/stakeFromAnyChain/node_modules
-/depositToCosmos/node_modules
-/crossChainSwap/node_modules
-/buyNftFromAnyChain/node_modules
+/**/node_modules
 /buyZoraNftFromAnyChain
 .env
 .DS_Store
