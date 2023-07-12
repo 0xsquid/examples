@@ -1,4 +1,6 @@
 /**/node_modules
 /buyZoraNftFromAnyChain
+/sequesterCarbonFromAnyChain
+/crosschainSwapFromCosmos/
 .env
 .DS_Store
