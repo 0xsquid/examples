@@ -19,7 +19,7 @@ const amount = "10000000000000000";
 
 const getSDK = () => {
   const squid = new Squid({
-    baseUrl: "https://api.squidrouter.com",
+    baseUrl: "https://squid-api-git-feat-cosmos-mainmainnet-0xsquid.vercel.app",
   });
   return squid;
 };
