@@ -1,0 +1,10 @@
+{
+    "scripts": {
+        "start": "ts-node src/index.ts"
+    },
+    "dependencies": {
+        "@0xsquid/sdk": "1.4.6-beta.0",
+        "@cosmjs/stargate": "^0.30.1",
+        "dotenv": "^16.0.3"
+    }
+}

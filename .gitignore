@@ -1,11 +1,6 @@
-/stakeFromAnyChain/node_modules
-/depositToCosmos/node_modules
-/crosschainSwap/node_modules
-/buyNftFromAnyChain/node_modules
+/**/node_modules
 /buyZoraNftFromAnyChain
 /sequesterCarbonFromAnyChain
-/stakeFromAnyChainPinjam/node_modules
-/crosschainSwapToCosmos/node_modules
 /crosschainSwapFromCosmos/
 .env
 .DS_Store
