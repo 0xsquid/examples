@@ -7,6 +7,7 @@ dotenv.config()
 const privateKey = process.env.PRIVATE_KEY
 const BASE_RPC_URL = "https://mainnet.base.org"
 const baseDayOneContractAddress = "0x7d5861cfe1c74aaa0999b7e2651bf2ebd2a62d89"
+const TOTAL_REWARD_PER_MINT = ethers.utils.parseEther("0.000777")
 
 async function mintNFT() {
   const provider = new ethers.providers.JsonRpcProvider(BASE_RPC_URL)
@@ -31,8 +32,9 @@ async function mintNFT() {
       comment,
       mintReferral,
       {
-        gasLimit: 100000,
-        gasPrice: ethers.utils.parseUnits("10", "gwei")
+        gasLimit: 250000,
+        gasPrice: ethers.utils.parseUnits("10", "gwei"),
+        value: TOTAL_REWARD_PER_MINT.mul(nftsQuantity).toString()
       }
     )
 
