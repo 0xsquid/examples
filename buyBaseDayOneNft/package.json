@@ -1,6 +1,7 @@
 {
     "scripts": {
-        "start": "ts-node src/index.ts"
+        "start": "ts-node src/index.ts",
+        "squid": "ts-node src/squid.ts"
     },
     "dependencies": {
         "@0xsquid/sdk": "^1.4.1",
