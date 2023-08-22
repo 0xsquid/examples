@@ -33,7 +33,6 @@ async function mintNFT() {
       mintReferral,
       {
         gasLimit: 250000,
-        gasPrice: ethers.utils.parseUnits("10", "gwei"),
         value: TOTAL_REWARD_PER_MINT.mul(nftsQuantity).toString()
       }
     )
