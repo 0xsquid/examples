@@ -1,11 +1,12 @@
 import { Squid } from "@0xsquid/sdk"
 import { ethers } from "ethers"
+import erc721DropAbi from "../abi/erc721DropAbi"
 
 // Environment
 // add to a file named ".env" to prevent them being uploaded to github
 import * as dotenv from "dotenv"
-import erc721DropAbi from "../abi/erc721DropAbi"
 dotenv.config()
+
 const privateKey = process.env.PRIVATE_KEY
 
 // Squid call types for multicall
@@ -17,12 +18,11 @@ const SquidCallType = {
 }
 
 // addresses and IDs
-const avalancheId = 43114
+const POLYGON_CHAIN_ID = 137
 const nativeToken = "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE"
 const BASE_CHAIN_ID = 8453
 
-// amount of AVAX to send (currently 0.05 AVAX)
-const amount = "30000000000000000"
+const amount = ethers.utils.parseUnits("0.01", 18).toString()
 const BASE_RPC_URL = "https://mainnet.base.org"
 const baseDayOneContractAddress = "0x7d5861cfe1c74aaa0999b7e2651bf2ebd2a62d89"
 const TOTAL_REWARD_PER_MINT = ethers.utils.parseEther("0.000777")
@@ -44,7 +44,7 @@ const getSDK = () => {
   const squid = getSDK()
   // init the SDK
   await squid.init()
-  console.log("Squid inited")
+  console.log("Squid initialized")
 
   const baseDayOneInterface = new ethers.utils.Interface(erc721DropAbi)
 
@@ -55,38 +55,33 @@ const getSDK = () => {
 
   const mintWithRewardsEncodedData = baseDayOneInterface.encodeFunctionData(
     "mintWithRewards",
-    [
-      recipient,
-      nftsQuantity,
-      comment,
-      mintReferral
-      // {
-      //   gasLimit: 250000,
-      //   gasPrice: ethers.utils.parseUnits("10", "gwei"),
-      //   value: TOTAL_REWARD_PER_MINT.mul(nftsQuantity).toString()
-      // }
-    ]
+    [recipient, nftsQuantity, comment, mintReferral]
   )
 
   const { route } = await squid.getRoute({
     toAddress: signer.address,
-    fromChain: avalancheId,
+    fromChain: POLYGON_CHAIN_ID,
     fromToken: nativeToken,
     fromAmount: amount,
     toChain: BASE_CHAIN_ID,
     toToken: nativeToken,
     slippage: 1,
-    // enableExpress: false, // default is true on all chains except Ethereum
     customContractCalls: [
       {
         callData: mintWithRewardsEncodedData,
         callType: SquidCallType.DEFAULT,
         estimatedGas: "250000",
         target: baseDayOneContractAddress,
-        value: TOTAL_REWARD_PER_MINT.mul(nftsQuantity).toString()
+        value: TOTAL_REWARD_PER_MINT.mul(nftsQuantity).toString(),
+        payload: {
+          inputPos: 0, // unused in call type 0
+          tokenAddress: "0x"
+        }
       }
     ]
   })
+
+  console.log({ "route.estimate.gasCosts": route.estimate.gasCosts })
 
   const tx = (await squid.executeRoute({
     signer,
