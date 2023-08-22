@@ -22,8 +22,9 @@ const POLYGON_CHAIN_ID = 137
 const nativeToken = "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE"
 const BASE_CHAIN_ID = 8453
 
-const amount = ethers.utils.parseUnits("0.01", 18).toString()
+const amount = ethers.utils.parseUnits("3", 18).toString()
 const BASE_RPC_URL = "https://mainnet.base.org"
+const POLYGON_RPC_URL = "https://polygon-rpc.com"
 const baseDayOneContractAddress = "0x7d5861cfe1c74aaa0999b7e2651bf2ebd2a62d89"
 const TOTAL_REWARD_PER_MINT = ethers.utils.parseEther("0.000777")
 
@@ -36,8 +37,9 @@ const getSDK = () => {
 
 ;(async () => {
   // set up your RPC provider and signer
-  const provider = new ethers.providers.JsonRpcProvider(BASE_RPC_URL)
+  const provider = new ethers.providers.JsonRpcProvider(POLYGON_RPC_URL)
   const signer = new ethers.Wallet(privateKey, provider)
+
   console.log("Signer address: ", signer.address)
 
   // instantiate the SDK
