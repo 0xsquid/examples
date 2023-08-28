@@ -1,14 +1,14 @@
 {
-    "scripts": {
-        "start": "ts-node src/index.ts",
-        "squid": "ts-node src/squid.ts"
-    },
-    "dependencies": {
-        "@0xsquid/sdk": "^1.4.1",
-        "dotenv": "^16.0.3",
-        "ethers": "^5.7.2"
-    },
-    "devDependencies": {
-        "@types/node": "20.4.9"
-    }
+  "scripts": {
+    "start": "ts-node src/ramses.ts",
+    "squid": "ts-node src/ramses-squid.ts"
+  },
+  "dependencies": {
+    "@0xsquid/sdk": "^1.4.1",
+    "dotenv": "^16.0.3",
+    "ethers": "^5.7.2"
+  },
+  "devDependencies": {
+    "@types/node": "20.4.9"
+  }
 }
