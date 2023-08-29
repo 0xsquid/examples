@@ -49,7 +49,7 @@ const getSDK = () => {
       "ibc/40F1B2458AEDA66431F9D44F48413240B8D28C072463E2BF53655728683583E3", // nUSDC on Osmosis
     toAddress: "osmo16xz3ujtdszrqzzjqpx79wuxya3w27jn9khnumm", // the recipient of the tokens on Osmosis
     slippage: 1.0, // 1.00 = 1% max slippage across the entire route
-    evmFallbackAddress: signer.address, // Fallback address for the EVM Side
+    fromAddress: signer.address, // Fallback address for the EVM Side
     quoteOnly: false, // optional, defaults to false, if true there are less params required by the api, but no tx object is returned
   };
 

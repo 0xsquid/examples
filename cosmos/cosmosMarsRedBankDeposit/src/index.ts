@@ -53,7 +53,7 @@ const getSDK = () => {
     fromChain: axelarChainId,
     fromToken: uaxlAddressAxelar,
     fromAmount: amount,
-    cosmosSignerAddress: signerAddress,
+    fromAddress: signerAddress,
     toChain: osmosisChainId,
     toToken: uosmoAddress,
     toAddress: osmosisAddress, // this address will be replaced with contract address

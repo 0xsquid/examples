@@ -37,6 +37,7 @@ const getSDK = () => {
   console.log("Squid inited");
 
   const { route } = await squid.getRoute({
+    fromAddress: signer.address,
     toAddress: osmosisRecipientAddress,
     fromChain: avalancheId,
     fromToken: nativeToken,

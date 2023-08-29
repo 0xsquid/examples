@@ -51,7 +51,7 @@ const getSDK = () => {
     fromChain: osmosisChainId,
     fromToken: uosmoAddress,
     fromAmount: amount,
-    cosmosSignerAddress: signerAddress,
+    fromAddress: signerAddress,
     toChain: avalancheChainId,
     toToken: nativeAvax,
     toAddress: evmToAddress,
