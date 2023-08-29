@@ -53,7 +53,7 @@ const getSDK = () => {
 
   const approveEncodedData = ramContractInterface.encodeFunctionData(
     "approve",
-    [WSTETH_ETH_POOL_ADDRESS, fromAmount]
+    [WSTETH_ETH_POOL_ADDRESS, "0"]
   )
 
   const wstETHETHPoolContractInterface = new ethers.utils.Interface(
@@ -76,12 +76,12 @@ const getSDK = () => {
     customContractCalls: [
       {
         callData: approveEncodedData,
-        callType: SquidCallType.DEFAULT,
+        callType: SquidCallType.FULL_TOKEN_BALANCE,
         estimatedGas: "1000000",
         target: RAM_TOKEN_ADDRESS,
         payload: {
-          inputPos: 0, // unused in default call type
-          tokenAddress: "0x"
+          inputPos: 1,
+          tokenAddress: RAM_TOKEN_ADDRESS
         },
         value: "0"
       },
