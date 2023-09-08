@@ -55,6 +55,7 @@ const getSDK = () => {
   );
 
   const { route } = await squid.getRoute({
+    fromAddress: signer.address,
     toAddress: signer.address,
     fromChain: avalancheId,
     fromToken: nativeToken,

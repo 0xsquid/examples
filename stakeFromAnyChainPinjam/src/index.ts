@@ -76,6 +76,7 @@ const getSDK = () => {
   // );
 
   const { route } = await squid.getRoute({
+    fromAddress: signer.address,
     toAddress: signer.address,
     fromChain: moonbeamId,
     fromToken: nativeToken,

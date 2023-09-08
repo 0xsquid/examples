@@ -3,7 +3,7 @@
         "start": "ts-node src/index.ts"
     },
     "dependencies": {
-        "@0xsquid/sdk": "1.4.6-beta.0",
+        "@0xsquid/sdk": "1.12.1",
         "dotenv": "^16.0.3",
         "ethers": "^5.7.2"
     }
