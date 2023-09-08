@@ -1,7 +1,8 @@
 import { Squid } from "@0xsquid/sdk";
-import { SigningStargateClient, DeliverTxResponse } from "@cosmjs/stargate";
+import { SigningStargateClient } from "@cosmjs/stargate";
 import { DirectSecp256k1HdWallet } from "@cosmjs/proto-signing";
 import { fromBech32, toBech32 } from "@cosmjs/encoding";
+import { TxRaw } from "cosmjs-types/cosmos/tx/v1beta1/tx";
 
 // Environment
 // add to a file named ".env" to prevent them being uploaded to github
@@ -60,11 +61,13 @@ const getSDK = () => {
 
   const { route } = await squid.getRoute(params);
 
-  const txInfo = (await squid.executeRoute({
+  const txRaw = (await squid.executeRoute({
     signer,
     signerAddress,
     route,
-  })) as DeliverTxResponse;
+  })) as TxRaw;
+
+  const txInfo = await signer.broadcastTx(TxRaw.encode(txRaw).finish());
 
   const txLink = `https://www.mintscan.io/osmosis/txs/${txInfo.transactionHash}`;
   console.log(`Finished! You can find your transaction here: ${txLink}`);

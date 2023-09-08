@@ -2,10 +2,10 @@
 # yarn lockfile v1
 
 
-"@0xsquid/sdk@1.12.0":
-  version "1.12.0"
-  resolved "https://registry.yarnpkg.com/@0xsquid/sdk/-/sdk-1.12.0.tgz#044f9bd79b1dece0fd37c1c379d6ce836c2c6a8b"
-  integrity sha512-dJ0nV2ha4dJrsMRw3splY1YMp/TLIog8T9D2Ewc5fHtAbNKhawAgZxQg27xdPKVKKAdZyoFyutwSpSqLNMh6EQ==
+"@0xsquid/sdk@1.12.1":
+  version "1.12.1"
+  resolved "https://registry.yarnpkg.com/@0xsquid/sdk/-/sdk-1.12.1.tgz#ccdb26bbfea698f6f44830e3b9a1b1bf6c51b34b"
+  integrity sha512-sZ8pvagfXwbF8i3JowWRPlpE91HbSZ24FtmXgwn41VwEMZESP0OQQjMo/yLV+1ChtB8TAKvjPTHoWgrxTWyAiA==
   dependencies:
     "@cosmjs/encoding" "^0.31.0"
     "@cosmjs/stargate" "^0.31.0"
