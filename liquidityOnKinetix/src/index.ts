@@ -72,13 +72,14 @@ const getSDK = () => {
       {
         target: REWARD_ROUTER_ADDRESS,
         callData: mintAndStakeEncodedCallData,
-        callType: SquidCallType.DEFAULT,
+        callType: SquidCallType.FULL_NATIVE_BALANCE,
         estimatedGas: "1600000",
+        // payload unused in call type 2
         payload: {
-          inputPos: 0, // unused
-          tokenAddress: "0x" // unused
+          inputPos: 0,
+          tokenAddress: "0x"
         },
-        value: "1"
+        value: ethers.utils.parseEther("1").toString()
       }
     ]
   })
