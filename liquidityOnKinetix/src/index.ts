@@ -79,7 +79,7 @@ const getSDK = () => {
           inputPos: 0,
           tokenAddress: "0x"
         },
-        value: ethers.utils.parseEther("1").toString()
+        value: "0"
       }
     ]
   })
