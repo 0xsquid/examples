@@ -42,11 +42,11 @@ const getSDK = (): Squid => {
   // Set up parameters for swapping tokens
   const params = {
     fromAddress: signer.address,
-    fromChain: arbitrumChainId,
-    fromToken: nativeToken,
+    fromChain: polygonChainId,
+    fromToken: polygonUsdc,
     fromAmount: amount,
-    toChain: baseChainId,
-    toToken: baseUsdc,
+    toChain: moonbeamChainId,
+    toToken: nativeToken,
     toAddress: signer.address,
     slippage: 1,
     slippageConfig: {
@@ -86,8 +86,8 @@ const getSDK = (): Squid => {
   const getStatusParams = {
     transactionId: txReceipt.transactionHash,
     requestId: requestId,
-    fromChainId: arbitrumChainId,
-    toChainId: baseChainId,
+    fromChainId: polygonChainId,
+    toChainId: moonbeamChainId,
   };
   const status = await squid.getStatus(getStatusParams);
 
