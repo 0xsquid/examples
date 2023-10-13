@@ -11,10 +11,10 @@ const integratorId: string = process.env.INTEGRATOR_ID!; // get one at https://f
 const arbitrumRpcEndpoint: string = process.env.ARBITRUM_RPC_ENDPOINT!;
 
 // Define chain and token addresses
-const arbitrumChainId = "42161"; // Arbitrum
-const baseChainId = "8453"; // Base
+const polygonChainId = "137"; // Polygon
+const moonbeamChainId = "1284"; // Moonbeam
 const nativeToken = "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE";
-const baseUsdc = "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913";
+const polygonUsdc = "0x2791bca1f2de4661ed88a30c99a7a9449aa84174";
 
 // Define amount to be sent
 const amount = "10000000000000000";
