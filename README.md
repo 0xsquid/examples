@@ -7,7 +7,7 @@ Repository of examples integrating the Squid API, SDK and Widget ✨💜
 Requires `node` and `npm` to be installed
 
 Navigate to the folder you want to try
-`cd crossChainSwap`
+`cd V2/sdk/swapArbitrumEthToBaseUsdc`
 
 Install packages
 `yarn install`
@@ -22,6 +22,18 @@ Run index.js
 Get straight into code! Run the crossChainSwap example, understand it, and then start extending. Send some tokens to the Cosmos, buy an NFT across chains, and stake across chains.
 
 Check out our [docs](https://docs.squidrouter.com) for a deeper look, and some hidden features.
+
+## V1 vs V2
+
+V1 is the original Squid API
+
+- EVM & Cosmos support
+- Planned to be deprecated
+
+V2
+
+- EVM only (Cosmos coming soon)
+- Where everything we build will be going from here!
 
 ## Where to find us
 
