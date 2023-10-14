@@ -8,16 +8,16 @@ dotenv.config();
 
 const privateKey: string = process.env.PRIVATE_KEY!;
 const integratorId: string = process.env.INTEGRATOR_ID!; // get one at https://form.typeform.com/to/cqFtqSvX
-const arbitrumRpcEndpoint: string = process.env.ARBITRUM_RPC_ENDPOINT!;
+const avalancheRpcEndpoint: string = process.env.AVALANCHE_RPC_ENDPOINT!;
 
 // Define chain and token addresses
-const arbitrumChainId = "42161"; // Arbitrum
-const baseChainId = "8453"; // Base
+const avalancheChainId = "43114"; // Avalanche
+const moonbeamChainId = "1284"; // Moonbeam
 const nativeToken = "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE";
-const baseUsdc = "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913";
+const avalancheUsdc = "0xA7D7079b0FEaD91F3e65f86E8915Cb59c1a4C664"; // USDC.e
 
 // Define amount to be sent
-const amount = "10000000000000000";
+const amount = "10000"; // 0.01 USDC
 
 // Function to get Squid SDK instance
 const getSDK = (): Squid => {
@@ -31,7 +31,7 @@ const getSDK = (): Squid => {
 // Main function
 (async () => {
   // Set up JSON RPC provider and signer
-  const provider = new ethers.providers.JsonRpcProvider(arbitrumRpcEndpoint);
+  const provider = new ethers.providers.JsonRpcProvider(avalancheRpcEndpoint);
   const signer = new ethers.Wallet(privateKey, provider);
 
   // Initialize Squid SDK
@@ -42,11 +42,11 @@ const getSDK = (): Squid => {
   // Set up parameters for swapping tokens
   const params = {
     fromAddress: signer.address,
-    fromChain: arbitrumChainId,
-    fromToken: nativeToken,
+    fromChain: avalancheChainId,
+    fromToken: avalancheUsdc,
     fromAmount: amount,
-    toChain: baseChainId,
-    toToken: baseUsdc,
+    toChain: moonbeamChainId,
+    toToken: nativeToken,
     toAddress: signer.address,
     slippage: 1,
     slippageConfig: {
@@ -80,8 +80,8 @@ const getSDK = (): Squid => {
   const getStatusParams = {
     transactionId: txReceipt.transactionHash,
     requestId: requestId,
-    fromChainId: arbitrumChainId,
-    toChainId: baseChainId,
+    fromChainId: avalancheChainId,
+    toChainId: moonbeamChainId,
   };
   const status = await squid.getStatus(getStatusParams);
 
