@@ -95,7 +95,6 @@ const delegateEncodedData = stakingContractInterface.encodeFunctionData(
     slippageConfig: {
       autoMode: 1,
     },
-    enableBoost: true,
     quoteOnly: false,
     // Customize contract call for staking on Fantom
     postHooks: [
@@ -143,11 +142,6 @@ const delegateEncodedData = stakingContractInterface.encodeFunctionData(
     "https://axelarscan.io/gmp/" + txReceipt.transactionHash;
   console.log(`Finished! Check Axelarscan for details: ${axelarScanLink}`);
 
-  // Display the API call link to track transaction status
-  console.log(
-    `Track status via API call: https://api.squidrouter.com/v1/status?transactionId=${txReceipt.transactionHash}`
-  );
-
   // Wait a few seconds before checking the status
   await new Promise((resolve) => setTimeout(resolve, 5000));
 
@@ -161,5 +155,5 @@ const delegateEncodedData = stakingContractInterface.encodeFunctionData(
   const status = await getStatus(getStatusParams);
 
   // Display the route status
-  console.log(`Route status: ${JSON.stringify(status)}`);
+  console.log(`Route status: ${status.squidTransactionStatus}`);
 })();

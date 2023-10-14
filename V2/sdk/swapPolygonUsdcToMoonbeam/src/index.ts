@@ -8,7 +8,7 @@ dotenv.config();
 
 const privateKey: string = process.env.PRIVATE_KEY!;
 const integratorId: string = process.env.INTEGRATOR_ID!; // get one at https://form.typeform.com/to/cqFtqSvX
-const arbitrumRpcEndpoint: string = process.env.ARBITRUM_RPC_ENDPOINT!;
+const polygonRpcEndpoint: string = process.env.POLYGON_RPC_ENDPOINT!;
 
 // Define chain and token addresses
 const polygonChainId = "137"; // Polygon
@@ -17,7 +17,7 @@ const nativeToken = "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE";
 const polygonUsdc = "0x2791bca1f2de4661ed88a30c99a7a9449aa84174";
 
 // Define amount to be sent
-const amount = "10000000000000000";
+const amount = "10000"; // 0.01 USDC
 
 // Function to get Squid SDK instance
 const getSDK = (): Squid => {
@@ -31,7 +31,7 @@ const getSDK = (): Squid => {
 // Main function
 (async () => {
   // Set up JSON RPC provider and signer
-  const provider = new ethers.providers.JsonRpcProvider(arbitrumRpcEndpoint);
+  const provider = new ethers.providers.JsonRpcProvider(polygonRpcEndpoint);
   const signer = new ethers.Wallet(privateKey, provider);
 
   // Initialize Squid SDK
@@ -52,7 +52,6 @@ const getSDK = (): Squid => {
     slippageConfig: {
       autoMode: 1,
     },
-    enableBoost: true,
     quoteOnly: false,
   };
 
@@ -74,11 +73,6 @@ const getSDK = (): Squid => {
     "https://axelarscan.io/gmp/" + txReceipt.transactionHash;
   console.log(`Finished! Check Axelarscan for details: ${axelarScanLink}`);
 
-  // Display the API call link to track transaction status
-  console.log(
-    `Track status via API call: https://api.squidrouter.com/v1/status?transactionId=${txReceipt.transactionHash}`
-  );
-
   // Wait a few seconds before checking the status
   await new Promise((resolve) => setTimeout(resolve, 5000));
 
@@ -92,5 +86,5 @@ const getSDK = (): Squid => {
   const status = await squid.getStatus(getStatusParams);
 
   // Display the route status
-  console.log(`Route status: ${JSON.stringify(status)}`);
+  console.log(`Route status: ${status.squidTransactionStatus}`);
 })();

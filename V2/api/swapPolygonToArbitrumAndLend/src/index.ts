@@ -102,7 +102,6 @@ const getStatus = async (params: any) => {
     slippageConfig: {
       autoMode: 1,
     },
-    enableBoost: true,
     quoteOnly: false,
     // Customize contract call for depositing on Arbitrum
     postHooks: [
@@ -149,11 +148,6 @@ const getStatus = async (params: any) => {
     "https://axelarscan.io/gmp/" + txReceipt.transactionHash;
   console.log(`Finished! Check Axelarscan for details: ${axelarScanLink}`);
 
-  // Display the API call link to track transaction status
-  console.log(
-    `Track status via API call: https://api.squidrouter.com/v1/status?transactionId=${txReceipt.transactionHash}`
-  );
-
   // Wait a few seconds before checking the status
   await new Promise((resolve) => setTimeout(resolve, 5000));
 
@@ -167,5 +161,5 @@ const getStatus = async (params: any) => {
   const status = await getStatus(getStatusParams);
 
   // Display the route status
-  console.log(`Route status: ${JSON.stringify(status)}`);
+  console.log(`Route status: ${status.squidTransactionStatus}`);
 })();
