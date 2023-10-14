@@ -8,13 +8,13 @@ dotenv.config();
 
 const privateKey: string = process.env.PRIVATE_KEY!;
 const integratorId: string = process.env.INTEGRATOR_ID!; // get one at https://form.typeform.com/to/cqFtqSvX
-const polygonRpcEndpoint: string = process.env.POLYGON_RPC_ENDPOINT!;
+const avalancheRpcEndpoint: string = process.env.AVALANCHE_RPC_ENDPOINT!;
 
 // Define chain and token addresses
-const polygonChainId = "137"; // Polygon
+const avalancheChainId = "43114"; // Avalanche
 const moonbeamChainId = "1284"; // Moonbeam
 const nativeToken = "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE";
-const polygonUsdc = "0x2791bca1f2de4661ed88a30c99a7a9449aa84174";
+const avalancheUsdc = "0xA7D7079b0FEaD91F3e65f86E8915Cb59c1a4C664";
 
 // Define amount to be sent
 const amount = "10000"; // 0.01 USDC
@@ -31,7 +31,7 @@ const getSDK = (): Squid => {
 // Main function
 (async () => {
   // Set up JSON RPC provider and signer
-  const provider = new ethers.providers.JsonRpcProvider(polygonRpcEndpoint);
+  const provider = new ethers.providers.JsonRpcProvider(avalancheRpcEndpoint);
   const signer = new ethers.Wallet(privateKey, provider);
 
   // Initialize Squid SDK
@@ -42,8 +42,8 @@ const getSDK = (): Squid => {
   // Set up parameters for swapping tokens
   const params = {
     fromAddress: signer.address,
-    fromChain: polygonChainId,
-    fromToken: polygonUsdc,
+    fromChain: avalancheChainId,
+    fromToken: avalancheUsdc,
     fromAmount: amount,
     toChain: moonbeamChainId,
     toToken: nativeToken,
@@ -80,7 +80,7 @@ const getSDK = (): Squid => {
   const getStatusParams = {
     transactionId: txReceipt.transactionHash,
     requestId: requestId,
-    fromChainId: polygonChainId,
+    fromChainId: avalancheChainId,
     toChainId: moonbeamChainId,
   };
   const status = await squid.getStatus(getStatusParams);
