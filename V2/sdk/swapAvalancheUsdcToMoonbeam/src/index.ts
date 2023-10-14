@@ -14,7 +14,7 @@ const avalancheRpcEndpoint: string = process.env.AVALANCHE_RPC_ENDPOINT!;
 const avalancheChainId = "43114"; // Avalanche
 const moonbeamChainId = "1284"; // Moonbeam
 const nativeToken = "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE";
-const avalancheUsdc = "0xA7D7079b0FEaD91F3e65f86E8915Cb59c1a4C664";
+const avalancheUsdc = "0xA7D7079b0FEaD91F3e65f86E8915Cb59c1a4C664"; // USDC.e
 
 // Define amount to be sent
 const amount = "10000"; // 0.01 USDC
