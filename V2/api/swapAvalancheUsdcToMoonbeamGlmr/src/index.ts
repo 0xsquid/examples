@@ -8,19 +8,19 @@ dotenv.config();
 
 const privateKey: string = process.env.PRIVATE_KEY!;
 const integratorId: string = process.env.INTEGRATOR_ID!; // get one at https://form.typeform.com/to/cqFtqSvX
-const arbitrumRpcEndpoint: string = process.env.ARBITRUM_RPC_ENDPOINT!;
+const moonbeamRpcEndpoint: string = process.env.MOONBEAM_RPC_ENDPOINT!;
 
 // Define chain and token addresses
-const arbitrumChainId = "42161"; // Arbitrum
-const baseChainId = "8453"; // Base
+const avalancheChainId = "43114"; // Avalanche
+const moonbeamChainId = "1284"; // Moonbeam
 const nativeToken = "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE";
-const baseUsdc = "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913";
+const avalancheUsdc = "0xA7D7079b0FEaD91F3e65f86E8915Cb59c1a4C664"; // USDC.e
 
 // Define amount to be sent
-const amount = "10000000000000000";
+const amount = "10000";
 
 // Set up JSON RPC provider and signer
-const provider = new ethers.providers.JsonRpcProvider(arbitrumRpcEndpoint);
+const provider = new ethers.providers.JsonRpcProvider(moonbeamRpcEndpoint);
 const signer = new ethers.Wallet(privateKey, provider);
 
 const getRoute = async (params: any) => {
@@ -74,11 +74,11 @@ const getStatus = async (params: any) => {
   // Set up parameters for swapping tokens
   const params = {
     fromAddress: signer.address,
-    fromChain: arbitrumChainId,
-    fromToken: nativeToken,
+    fromChain: avalancheChainId,
+    fromToken: avalancheUsdc,
     fromAmount: amount,
-    toChain: baseChainId,
-    toToken: baseUsdc,
+    toChain: moonbeamChainId,
+    toToken: nativeToken,
     toAddress: signer.address,
     slippage: 1,
     slippageConfig: {
@@ -123,8 +123,8 @@ const getStatus = async (params: any) => {
   const getStatusParams = {
     transactionId: txReceipt.transactionHash,
     requestId: requestId,
-    fromChainId: arbitrumChainId,
-    toChainId: baseChainId,
+    fromChainId: avalancheChainId,
+    toChainId: moonbeamChainId,
   };
   const status = await getStatus(getStatusParams);
 

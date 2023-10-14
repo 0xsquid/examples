@@ -145,7 +145,7 @@ const transferRemainingBalanceEncodeData =
   );
   const tx = await contract.send(transactionRequest.data, {
     value: transactionRequest.value,
-    gasPrice: transactionRequest.gasPrice,
+    gasPrice: await provider.getGasPrice(),
     gasLimit: transactionRequest.gasLimit,
   });
   const txReceipt = await tx.wait();
