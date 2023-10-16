@@ -8,7 +8,7 @@ dotenv.config();
 
 const privateKey: string = process.env.PRIVATE_KEY!;
 const integratorId: string = process.env.INTEGRATOR_ID!; // get one at https://form.typeform.com/to/cqFtqSvX
-const moonbeamRpcEndpoint: string = process.env.MOONBEAM_RPC_ENDPOINT!;
+const avalancheRpcEndpoint: string = process.env.AVALANCHE_RPC_ENDPOINT!;
 
 // Define chain and token addresses
 const avalancheChainId = "43114"; // Avalanche
@@ -20,7 +20,7 @@ const avalancheUsdc = "0xA7D7079b0FEaD91F3e65f86E8915Cb59c1a4C664"; // USDC.e
 const amount = "10000";
 
 // Set up JSON RPC provider and signer
-const provider = new ethers.providers.JsonRpcProvider(moonbeamRpcEndpoint);
+const provider = new ethers.providers.JsonRpcProvider(avalancheRpcEndpoint);
 const signer = new ethers.Wallet(privateKey, provider);
 
 const getRoute = async (params: any) => {
