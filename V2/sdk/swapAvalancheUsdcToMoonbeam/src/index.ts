@@ -1,6 +1,7 @@
 // Import necessary libraries
 import { ethers } from "ethers";
 import { Squid } from "@0xsquid/sdk";
+import { Token, ChainData } from "@0xsquid/squid-types";
 
 // Load environment variables from .env file
 import * as dotenv from "dotenv";
@@ -31,7 +32,7 @@ const getSDK = (): Squid => {
 // Main function
 (async () => {
   // Set up JSON RPC provider and signer
-  const provider = new ethers.providers.JsonRpcProvider(avalancheRpcEndpoint);
+  const provider = new ethers.JsonRpcProvider(avalancheRpcEndpoint);
   const signer = new ethers.Wallet(privateKey, provider);
 
   // Initialize Squid SDK
@@ -65,12 +66,11 @@ const getSDK = (): Squid => {
   const tx = (await squid.executeRoute({
     signer,
     route,
-  })) as unknown as ethers.providers.TransactionResponse;
+  })) as unknown as ethers.TransactionResponse;
   const txReceipt = await tx.wait();
 
   // Show the transaction receipt with Axelarscan link
-  const axelarScanLink =
-    "https://axelarscan.io/gmp/" + txReceipt.transactionHash;
+  const axelarScanLink = "https://axelarscan.io/gmp/" + txReceipt.hash;
   console.log(`Finished! Check Axelarscan for details: ${axelarScanLink}`);
 
   // Wait a few seconds before checking the status
@@ -78,7 +78,7 @@ const getSDK = (): Squid => {
 
   // Retrieve the transaction's route status
   const getStatusParams = {
-    transactionId: txReceipt.transactionHash,
+    transactionId: txReceipt.hash,
     requestId: requestId,
     fromChainId: avalancheChainId,
     toChainId: moonbeamChainId,
