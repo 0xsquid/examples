@@ -1,0 +1,16 @@
+{
+    "scripts": {
+        "start": "ts-node src/index.ts",
+        "start:decentraland": "ts-node src/decentraland.ts"
+    },
+    "dependencies": {
+        "@0xsquid/sdk": "2.8.0-beta.0",
+        "@0xsquid/squid-types": "^0.1.28",
+        "dotenv": "^16.0.3",
+        "ethers": "^6.7.1",
+        "typescript": "^5.2.2"
+    },
+    "devDependencies": {
+        "ts-node": "^10.9.1"
+    }
+}
