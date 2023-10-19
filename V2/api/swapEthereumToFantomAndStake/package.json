@@ -3,7 +3,9 @@
 		"start": "ts-node src/index.ts"
 	},
 	"dependencies": {
-		"axios": "^1.5.1",
+		"@0xsquid/sdk": "^2.7.0",
+		"@0xsquid/squid-types": "^0.1.27",
+		"@openzeppelin/contracts": "^4.9.3",
 		"dotenv": "^16.3.1",
 		"ethers": "^5.7.2"
 	}
