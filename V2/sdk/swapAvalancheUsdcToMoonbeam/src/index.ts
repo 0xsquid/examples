@@ -1,7 +1,6 @@
 // Import necessary libraries
 import { ethers } from "ethers";
 import { Squid } from "@0xsquid/sdk";
-import { Token, ChainData } from "@0xsquid/squid-types";
 
 // Load environment variables from .env file
 import * as dotenv from "dotenv";
@@ -18,7 +17,7 @@ const nativeToken = "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE";
 const avalancheUsdc = "0xA7D7079b0FEaD91F3e65f86E8915Cb59c1a4C664"; // USDC.e
 
 // Define amount to be sent
-const amount = "10000"; // 0.01 USDC
+const amount = "1000000000"; // 0.01 USDC
 
 // Function to get Squid SDK instance
 const getSDK = (): Squid => {
@@ -61,6 +60,19 @@ const getSDK = (): Squid => {
   // Get the swap route using Squid SDK
   const { route, requestId } = await squid.getRoute(params);
   console.log("Calculated route:", route.estimate.toAmount);
+
+  const { isApproved, message } = await squid.isRouteApproved({
+    route,
+    sender: signer.address,
+  });
+
+  // check if route is approved
+  if (!isApproved) {
+    console.log("Route is not approved, approving now...");
+    const approve = await squid.approveRoute({ signer, route });
+    signer.provider.getNetwork;
+  }
+  console.log("Route is approved");
 
   // Execute the swap transaction
   const tx = (await squid.executeRoute({
