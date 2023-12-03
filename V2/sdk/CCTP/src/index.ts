@@ -94,7 +94,7 @@ const getSDK = (): Squid => {
 
   console.log("checkig tx status....");
   async function waitForSuccess() {
-    await new Promise((resolve) => setTimeout(resolve, 5000));
+    await new Promise((resolve) => setTimeout(resolve, 1000));
     let isSuccess = false;
     while (!isSuccess) {
       try {
