@@ -17,7 +17,7 @@ const usdcEVMToken = "0xB97EF9Ef8734C71904D8002F8b6Bc66Dd9c48a6E";
 const usdcTokenNoble = "uusdc";
 
 // Define amount to be sent
-const amount = "100000"; // 0.01 USDC
+const amount = "100000"; // 0.1 USDC
 
 // Function to get Squid SDK instance
 const getSDK = (): Squid => {
