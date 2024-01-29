@@ -3,6 +3,7 @@
 		"start": "ts-node src/index.ts"
 	},
 	"dependencies": {
+		"@0xsquid/squid-types": "^0.1.28",
 		"@nomiclabs/hardhat-ethers": "^2.2.3",
 		"@nomiclabs/hardhat-etherscan": "^3.1.7",
 		"@nomiclabs/hardhat-web3": "^2.0.0",
