@@ -1,17 +1,17 @@
 import { Squid } from "@0xsquid/sdk";
+import { ChainType, SquidCallType } from "@0xsquid/sdk/dist/types";
 import * as dotenv from "dotenv";
-import { Wallet, ethers } from "ethers";
+import { ethers } from "ethers";
 import decentralandBuyAbi from "../abi/decentralandAbi";
 import erc20Abi from "../abi/erc20Abi";
 import { erc721Abi } from "../abi/erc721Abi";
-import { ChainType, SquidCallType } from "@0xsquid/sdk/dist/types";
 dotenv.config();
 
 const config = {
   polygonChainId: "137",
   MANAPolygon: "0xa1c57f48f0deb89f569dfbe6e2b7f46d33606fd4", // ERC20 to buy NFTs with
   decentralandBuyAddress: "0x480a0f4e360E8964e68858Dd231c2922f1df45Ef", // Decentraland contract to buy NFTs (listing, not minting)
-  squidMulticall: "0x4fd39C9E151e50580779bd04B1f7eCc310079fd3", // Squid calling contract
+  squidMulticall: "0xd9b7849d3a49e287c8E448cea0aAe852861C4545", // Squid calling contract
   avalancheId: "43114",
   nativeToken: "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE",
 
