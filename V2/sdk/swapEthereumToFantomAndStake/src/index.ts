@@ -15,7 +15,7 @@ const stakingContractAddress: string = process.env.STAKING_CONTRACT_ADDRESS!;
 const ethereumId = "1"; // Ethereum
 const fantomId = "250"; // Fantom
 const nativeToken = "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE";
-const ethereumUsdc = "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48";
+const ethereumUsdc = "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE";
 
 // Define amount to swap and stake
 const amountToSwap = "10000000000000000";
@@ -26,7 +26,7 @@ import stakingContractAbi from "../abi/fantomSFC";
 // Function to get Squid SDK instance
 const getSDK = (): Squid => {
   const squid = new Squid({
-    baseUrl: "https://v2.api.squidrouter.com",
+    baseUrl: "https://apiplus.squidrouter.com",
     integratorId: integratorId,
   });
   return squid;
@@ -88,31 +88,32 @@ const getSDK = (): Squid => {
   const { route, requestId } = await squid.getRoute(params);
   console.log("Calculated route:", route.estimate.toAmount);
   console.log("Calculated fee costs: ", route.estimate.feeCosts);
+  console.log(route.transactionRequest.data);
 
-  // Execute the swap and staking transaction
-  const tx = (await squid.executeRoute({
-    signer,
-    route,
-  })) as unknown as ethers.providers.TransactionResponse;
-  const txReceipt = await tx.wait();
+  // // Execute the swap and staking transaction
+  // const tx = (await squid.executeRoute({
+  //   signer,
+  //   route,
+  // })) as unknown as ethers.providers.TransactionResponse;
+  // const txReceipt = await tx.wait();
 
-  // Show the transaction receipt with Axelarscan link
-  const axelarScanLink =
-    "https://axelarscan.io/gmp/" + txReceipt.transactionHash;
-  console.log(`Finished! Check Axelarscan for details: ${axelarScanLink}`);
+  // // Show the transaction receipt with Axelarscan link
+  // const axelarScanLink =
+  //   "https://axelarscan.io/gmp/" + txReceipt.transactionHash;
+  // console.log(`Finished! Check Axelarscan for details: ${axelarScanLink}`);
 
-  // Wait a few seconds before checking the status
-  await new Promise((resolve) => setTimeout(resolve, 5000));
+  // // Wait a few seconds before checking the status
+  // await new Promise((resolve) => setTimeout(resolve, 5000));
 
-  // Retrieve the transaction's route status
-  const getStatusParams = {
-    transactionId: txReceipt.transactionHash,
-    requestId: requestId,
-    fromChainId: ethereumId,
-    toChainId: fantomId,
-  };
-  const status = await squid.getStatus(getStatusParams);
+  // // Retrieve the transaction's route status
+  // const getStatusParams = {
+  //   transactionId: txReceipt.transactionHash,
+  //   requestId: requestId,
+  //   fromChainId: ethereumId,
+  //   toChainId: fantomId,
+  // };
+  // const status = await squid.getStatus(getStatusParams);
 
-  // Display the route status
-  console.log(`Route status: ${status.squidTransactionStatus}`);
+  // // Display the route status
+  // console.log(`Route status: ${status.squidTransactionStatus}`);
 })();
