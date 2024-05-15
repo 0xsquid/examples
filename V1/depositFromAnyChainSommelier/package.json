@@ -1,0 +1,15 @@
+{
+    "scripts": {
+        "start": "ts-node src/index.ts"
+    },
+    "dependencies": {
+        "@0xsquid/sdk": "^1.4.1",
+        "dotenv": "^16.0.3",
+        "ethers": "^5.7.2",
+        "ts-node": "^10.9.2",
+        "typescript": "^5.4.5"
+    },
+    "devDependencies": {
+        "@types/node": "^20.12.12"
+    }
+}
