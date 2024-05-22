@@ -6,27 +6,34 @@ import { Squid } from "@0xsquid/sdk";
 import * as dotenv from "dotenv";
 dotenv.config();
 
+// Load environment variables from .env file
 const privateKey: string = process.env.PRIVATE_KEY!;
-const integratorId: string = process.env.INTEGRATOR_ID!; // get one at https://form.typeform.com/to/cqFtqSvX
-const rpcEndpoint: string = process.env.RPC_ENDPOINT!;
-const radiantLendingPoolAddress = process.env.RADIANT_LENDING_POOL_ADDRESS!;
-const usdcArbitrumAddress = process.env.USDC_ARBITRUM_ADDRESS!;
+const integratorId: string = process.env.INTEGRATOR_ID!;
+const FROM_CHAIN_RPC: string = process.env.RPC_ENDPOINT!;
+const radiantLendingPoolAddress: string = process.env.RADIANT_LENDING_POOL_ADDRESS!;
+const usdcArbitrumAddress: string = process.env.USDC_ARBITRUM_ADDRESS!;
 
 // Define chain and token addresses
-const polygonId = "137"; // Polygon
-const arbitrumId = "42161"; // Arbitrum
-const nativeToken = "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE"; // Define departing token
+const fromChainId = "56"; // Binance
+const toChainId = "42161"; // Arbitrum
+const fromToken = "0x55d398326f99059fF775485246999027B3197955"; // Define departing token
 
 // Define amount to be sent
-const amount = "10000000000000000";
+const amount = "100000000000000000";
 
 // Import Radiant lending pool ABI
 import radiantLendingPoolAbi from "../abi/radiantLendingPoolAbi";
 
+// Import erc20 contract ABI
+import erc20Abi from "../abi/erc20Abi";
+import { ChainType } from "@0xsquid/squid-types";
+import { Description } from "@ethersproject/properties";
+
+
 // Function to get Squid SDK instance
 const getSDK = (): Squid => {
   const squid = new Squid({
-    baseUrl: "https://v2.api.squidrouter.com",
+    baseUrl: "https://apiplus.squidrouter.com",
     integratorId: integratorId,
   });
   return squid;
@@ -35,13 +42,21 @@ const getSDK = (): Squid => {
 // Main function
 (async () => {
   // Set up JSON RPC provider and signer for source chain (Ethereum)
-  const provider = new ethers.providers.JsonRpcProvider(rpcEndpoint);
+  const provider = new ethers.providers.JsonRpcProvider(FROM_CHAIN_RPC);
   const signer = new ethers.Wallet(privateKey, provider);
 
   // Initialize Squid SDK
   const squid = getSDK();
   await squid.init();
   console.log("Initialized Squid SDK");
+
+  // Creating Contract interfaces
+  // Approve the lending contract to spend the erc20
+  const erc20Interface = new ethers.utils.Interface(erc20Abi);
+  const approvalerc20 = erc20Interface.encodeFunctionData("approve", [
+    radiantLendingPoolAddress,
+    ethers.constants.MaxUint256,
+  ]);
 
   // Create contract interface and encode deposit function for Radiant lending pool
   const radiantLendingPoolInterface = new ethers.utils.Interface(
@@ -57,43 +72,65 @@ const getSDK = (): Squid => {
     ]
   );
 
+  
+  
   // Set up parameters for swapping tokens and depositing into Radiant lending pool
   const params = {
     fromAddress: signer.address,
-    fromChain: polygonId,
-    fromToken: nativeToken,
+    fromChain: fromChainId,
+    fromToken: fromToken,
     fromAmount: amount,
-    toChain: arbitrumId,
+    toChain: toChainId,
     toToken: usdcArbitrumAddress,
     toAddress: signer.address,
     slippage: 1,
+    quoteOnly: false,
+    enableBoost: true,
     slippageConfig: {
       autoMode: 1,
     },
-    quoteOnly: false,
-    // Customize contract call for depositing on Arbitrum
-    postHooks: [
-      {
-        callType: 1, // SquidCallType.FULL_TOKEN_BALANCE
-        target: radiantLendingPoolAddress,
-        value: "0",
-        callData: depositEncodedData,
-        payload: {
-          tokenAddress: usdcArbitrumAddress,
-          inputPos: 1,
+    postHooks: {
+      chainType: ChainType.EVM,
+      calls: [
+        {
+          chainType: ChainType.EVM, 
+          callType: 1,// SquidCallType.FULL_TOKEN_BALANCE
+          target: usdcArbitrumAddress,
+          value: "0", // this will be replaced by the full native balance of the multicall after the swap
+          callData: approvalerc20,
+          payload: {
+            tokenAddress: usdcArbitrumAddress,
+            inputPos: 1,
+          },
+          estimatedGas: "50000",
         },
-        estimatedGas: "50000",
-      },
-    ],
+        {
+          chainType: ChainType.EVM,
+          callType: 1, // SquidCallType.FULL_TOKEN_BALANCE
+          target: radiantLendingPoolAddress,
+          value: "0",
+          callData: depositEncodedData,
+          payload: {
+            tokenAddress: usdcArbitrumAddress,
+            inputPos: 1,
+          },
+          estimatedGas: "50000",
+        },
+      ],
+      description: "sample",
+      logoURI: "https://v2.app.squidrouter.com/images/icons/squid_logo.svg",
+      provider: signer.address,
+    },
   };
+  
 
-  console.log("Parameters:", params);
+  console.log("Parameters:", params); // Printing the parameters for QA
 
   // Get the swap route using Squid SDK
   const { route, requestId } = await squid.getRoute(params);
   console.log("Calculated route:", route.estimate.toAmount);
 
-  // Execute the swap and deposit transaction
+  // Execute the swap transaction
   const tx = (await squid.executeRoute({
     signer,
     route,
@@ -101,22 +138,57 @@ const getSDK = (): Squid => {
   const txReceipt = await tx.wait();
 
   // Show the transaction receipt with Axelarscan link
-  const axelarScanLink =
-    "https://axelarscan.io/gmp/" + txReceipt.transactionHash;
+  const axelarScanLink = "https://axelarscan.io/gmp/" + txReceipt.transactionHash;
   console.log(`Finished! Check Axelarscan for details: ${axelarScanLink}`);
 
   // Wait a few seconds before checking the status
   await new Promise((resolve) => setTimeout(resolve, 5000));
 
-  // Retrieve the transaction's route status
+  // Parameters for checking the status of the transaction
   const getStatusParams = {
     transactionId: txReceipt.transactionHash,
     requestId: requestId,
-    fromChainId: polygonId,
-    toChainId: arbitrumId,
+    integratorId: integratorId,
+    fromChainId: fromChainId,
+    toChainId: toChainId,
   };
-  const status = await squid.getStatus(getStatusParams);
 
-  // Display the route status
-  console.log(`Route status: ${status.squidTransactionStatus}`);
+  const completedStatuses = ["success", "partial_success", "needs_gas", "not_found"];
+  const maxRetries = 10; // Maximum number of retries for status check
+  let retryCount = 0;
+  let status = await squid.getStatus(getStatusParams);
+
+  // Loop to check the transaction status until it is completed or max retries are reached
+  console.log(`Initial route status: ${status.squidTransactionStatus}`);
+
+  do {
+    try {
+      // Wait a few seconds before checking the status
+      await new Promise((resolve) => setTimeout(resolve, 5000));
+
+      // Retrieve the transaction's route status
+      status = await squid.getStatus(getStatusParams);
+
+      // Display the route status
+      console.log(`Route status: ${status.squidTransactionStatus}`);
+
+    } catch (error: unknown) {
+      // Handle error if the transaction status is not found
+      if (error instanceof Error && (error as any).response && (error as any).response.status === 404) {
+        retryCount++;
+        if (retryCount >= maxRetries) {
+          console.error("Max retries reached. Transaction not found.");
+          break;
+        }
+        console.log("Transaction not found. Retrying...");
+        continue;
+      } else {
+        throw error;
+      }
+    }
+
+  } while (status && !completedStatuses.includes(status.squidTransactionStatus));
+
+  // Wait for the transaction to be mined
+  console.log("Swap transaction executed:", txReceipt.transactionHash);
 })();
