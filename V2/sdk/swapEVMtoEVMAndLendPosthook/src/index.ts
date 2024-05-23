@@ -27,7 +27,6 @@ import radiantLendingPoolAbi from "../abi/radiantLendingPoolAbi";
 // Import erc20 contract ABI
 import erc20Abi from "../abi/erc20Abi";
 import { ChainType } from "@0xsquid/squid-types";
-import { Description } from "@ethersproject/properties";
 
 
 // Function to get Squid SDK instance
