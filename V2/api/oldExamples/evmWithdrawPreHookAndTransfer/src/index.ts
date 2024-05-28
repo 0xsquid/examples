@@ -1,35 +1,37 @@
+// Import necessary libraries
 import { ethers } from "ethers";
 import axios from "axios";
 import * as dotenv from "dotenv";
 dotenv.config();
 
-import aaveLendingPoolAbi from "../abi/aavePoolAbi"; // Adjust the path if necessary
-
+// Load environment variables from .env file
 const privateKey: string = process.env.PRIVATE_KEY!;
 const integratorId: string = process.env.INTEGRATOR_ID!;
 const FROM_CHAIN_RPC: string = process.env.RPC_ENDPOINT!;
-const AAVE_LENDING_POOL_ADDRESS: string = process.env.AAVE_LENDING_POOL_ADDRESS!;
-const usdcArbitrumAddress: string = process.env.USDC_ARBITRUM_ADDRESS!;
+const WETH_ADDRESS: string = process.env.WETH_ADDRESS!;
 
+// Define chain and token addresses
 const fromChainId = "42161"; // Arbitrum
-const toChainId = "56"; // Binance
-const fromToken = usdcArbitrumAddress; // USDC on Arbitrum
+const toChainId = "56"; // Binance Smart Chain
 const toToken = "0x55d398326f99059fF775485246999027B3197955"; // USDT on Binance
 
-const amount = "10000000"; // 10 USDC in smallest units
+// Define amount to be unwrapped and bridged
+const amount = ethers.utils.parseEther("0.0001"); // Amount in WETH
 
-const provider = new ethers.JsonRpcProvider(FROM_CHAIN_RPC);
+// Set up JSON RPC provider and signer
+const provider = new ethers.providers.JsonRpcProvider(FROM_CHAIN_RPC);
 const signer = new ethers.Wallet(privateKey, provider);
 
-const aaveLendingPoolInterface = new ethers.Interface(aaveLendingPoolAbi);
-const withdrawEncodedData = aaveLendingPoolInterface.encodeFunctionData("withdraw", [
-  usdcArbitrumAddress,
-  amount,
-  signer.address,
-]);
+// Import WETH ABI
+import wethAbi from "../abi/wethAbi"; // Adjust the path if necessary
 
-console.log("Encoded Data:", withdrawEncodedData);
+// Creating Contract interfaces
+const wethInterface = new ethers.utils.Interface(wethAbi);
 
+// Encode withdraw function for WETH contract
+const withdrawEncodedData = wethInterface.encodeFunctionData("Withdrawal, [amount]);
+
+// Function to get the optimal route for the swap using Squid API
 const getRoute = async (params: any) => {
   try {
     const result = await axios.post(
@@ -42,14 +44,18 @@ const getRoute = async (params: any) => {
         },
       }
     );
-    const requestId = result.headers["x-request-id"];
+    const requestId = result.headers["x-request-id"]; // Retrieve request ID from response headers
     return { data: result.data, requestId: requestId };
   } catch (error) {
-    console.error("Error in getRoute:", error.response?.data || error.message);
+    if (error.response) {
+      console.error("API error:", error.response.data);
+    }
+    console.error("Error with parameters:", params);
     throw error;
   }
 };
 
+// Function to get the status of the transaction using Squid API
 const getStatus = async (params: any) => {
   try {
     const result = await axios.get("https://apiplus.squidrouter.com/v2/status", {
@@ -65,11 +71,15 @@ const getStatus = async (params: any) => {
     });
     return result.data;
   } catch (error) {
-    console.error("Error in getStatus:", error.response?.data || error.message);
+    if (error.response) {
+      console.error("API error:", error.response.data);
+    }
+    console.error("Error with parameters:", params);
     throw error;
   }
 };
 
+// Function to periodically check the transaction status until it completes
 const updateTransactionStatus = async (txHash: string, requestId: string) => {
   const getStatusParams = {
     transactionId: txHash,
@@ -80,7 +90,7 @@ const updateTransactionStatus = async (txHash: string, requestId: string) => {
 
   let status;
   const completedStatuses = ["success", "partial_success", "needs_gas", "not_found"];
-  const maxRetries = 15;
+  const maxRetries = 15; // Maximum number of retries for status check
   let retryCount = 0;
 
   do {
@@ -95,56 +105,60 @@ const updateTransactionStatus = async (txHash: string, requestId: string) => {
           break;
         }
         console.log("Transaction not found. Retrying...");
-        await new Promise((resolve) => setTimeout(resolve, 20000));
+        await new Promise((resolve) => setTimeout(resolve, 20000)); // Wait for 20 seconds before retrying
         continue;
       } else {
-        throw error;
+        throw error; // Rethrow other errors
       }
     }
 
     if (!completedStatuses.includes(status.squidTransactionStatus)) {
-      await new Promise((resolve) => setTimeout(resolve, 5000));
+      await new Promise((resolve) => setTimeout(resolve, 5000)); // Wait for 5 seconds before checking the status again
     }
   } while (!completedStatuses.includes(status.squidTransactionStatus));
 };
 
+// Set up parameters for unwrapping WETH to ETH and bridging to USDT on Binance Smart Chain
 (async () => {
   const params = {
     fromAddress: signer.address,
     fromChain: fromChainId,
-    fromToken: fromToken,
-    fromAmount: amount,
+    fromToken: WETH_ADDRESS, // WETH on Arbitrum
+    fromAmount: amount.toString(),
     toChain: toChainId,
     toToken: toToken,
     toAddress: signer.address,
-    slippage: 1,
     slippageConfig: {
-      autoMode: 1,
+      slippage: 30,
+      autoMode: 2,
     },
     preHook: {
       chainType: "evm",
-      fundAmount: amount,
-      fundToken: usdcArbitrumAddress,
+      fundAmount: amount.toString(),
+      fundToken: WETH_ADDRESS, // WETH
+      provider: "Integration Test",
+      description: "Unwrap WETH to ETH",
+      hookUri: "http://",
       calls: [
         {
-          callType: 1,
-          target: AAVE_LENDING_POOL_ADDRESS,
-          value: "0",
-          callData: withdrawEncodedData,
-          payload: {
-            tokenAddress: usdcArbitrumAddress,
-            inputPos: "1",
-          },
-          estimatedGas: "50000",
           chainType: "evm",
+          callType: 2,
+          target: WETH_ADDRESS,
+          value: "0",
+          callData: withdrawEncodedData, // Function signature for withdraw() in WETH contract
+          payload: {
+            tokenAddress: WETH_ADDRESS,
+            inputPos: 0,
+          },
+          estimatedGas: "20000",
         },
       ],
-      description: "Withdraw 10 USDC from AAVE and swap to USDT on Binance",
     },
   };
 
   console.log("Parameters:", params);
 
+  // Get the swap route using Squid API
   const routeResult = await getRoute(params);
   const route = routeResult.data.route;
   const requestId = routeResult.requestId;
@@ -153,23 +167,25 @@ const updateTransactionStatus = async (txHash: string, requestId: string) => {
 
   const transactionRequest = route.transactionRequest;
 
-  try {
-    const tx = await signer.sendTransaction({
-      to: transactionRequest.target,
-      data: transactionRequest.data,
-      value: transactionRequest.value,
-      gasPrice: await provider.getGasPrice(),
-      gasLimit: ethers.utils.hexlify(3000000), // Increase gas limit
-    });
-    console.log("Transaction Hash:", tx.hash);
-    const txReceipt = await tx.wait();
-    console.log("Transaction Receipt:", txReceipt);
+  // Execute the swap transaction
+  const tx = await signer.sendTransaction({
+    to: transactionRequest.target,
+    data: transactionRequest.data,
+    value: transactionRequest.value,
+    gasPrice: await provider.getGasPrice(),
+    gasLimit: transactionRequest.gasLimit,
+  });
+  console.log("Transaction Hash:", tx.hash);
+  const txReceipt = await tx.wait();
 
-    const axelarScanLink = "https://axelarscan.io/gmp/" + txReceipt.transactionHash;
-    console.log(`Finished! Check Axelarscan for details: ${axelarScanLink}`);
+  // Show the transaction receipt with Axelarscan link
+  const axelarScanLink = "https://axelarscan.io/gmp/" + txReceipt.transactionHash;
+  console.log(`Finished! Check Axelarscan for details: ${axelarScanLink}`);
 
-    await updateTransactionStatus(txReceipt.transactionHash, requestId);
-  } catch (error) {
-    console.error("Transaction failed:", error);
-  }
+  // Update transaction status until it completes
+  await updateTransactionStatus(txReceipt.transactionHash, requestId);
+
+  // Check ETH balance
+  const ethBalance = await provider.getBalance(signer.address);
+  console.log("ETH Balance after transaction:", ethers.utils.formatEther(ethBalance));
 })();
