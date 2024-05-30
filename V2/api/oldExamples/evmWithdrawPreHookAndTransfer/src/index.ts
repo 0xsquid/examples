@@ -15,9 +15,9 @@ const usdcArbitrumAddress: string = process.env.USDC_ARBITRUM_ADDRESS!;
 const fromChainId = "42161"; // Arbitrum
 const toChainId = "56"; // Binance
 const fromToken = usdcArbitrumAddress; // USDC on Arbitrum
-const toToken = "0x55d398326f99059fF775485246999027B3197955"; // USDT on Binance
+const toToken = "0x4268B8F0B87b6Eae5d897996E6b845ddbD99Adf3"; // USDT on Binance
 
-const amount = "1000000"; // 10 USDC in smallest units
+const amount = "100000"; // 10 USDC in smallest units
 
 // Set up JSON RPC provider and signer 
 const provider = new ethers.providers.JsonRpcProvider(FROM_CHAIN_RPC);
@@ -40,32 +40,6 @@ const approvalerc20 = erc20Interface.encodeFunctionData("approve", [
   "0x794a61358d6845594f94dc1db02a252b5b4814ad", //address to approve spending 
   ethers.constants.MaxUint256,
 ]);
-
-//Approving squid router contract to spend Aave USDC
-
-
-// Create a wallet instance
-
-
-const erc20Contract = new ethers.Contract('0x724dc807b04555b71ed48a6896b6F41593b8C637', erc20Abi, signer);//aave usdc
-
-// Function to approve tokens
-async function approveToken() {
-  console.log("entered approve function")
-  try {
-    const tx = await erc20Contract.approve('0xce16f69375520ab01377ce7b88f5ba8c48f8d666', amount);
-    console.log("Transaction hash:", tx.hash);
-    await tx.wait();
-    console.log("Transaction confirmed");
-  } catch (error) {
-    console.error("Error approving tokens:", error);
-  }
-}
-
-// Call the approve function
-
-
-
 
 
 
@@ -149,7 +123,6 @@ const updateTransactionStatus = async (txHash: string, requestId: string) => {
 
 (async () => {
 
-  approveToken();
   const params = {
     fromAddress: signer.address,
     fromChain: fromChainId,
@@ -167,6 +140,7 @@ const updateTransactionStatus = async (txHash: string, requestId: string) => {
       fundAmount: amount, 
       fundToken: '0x724dc807b04555b71ed48a6896b6F41593b8C637', //aave usdc
       calls: [
+        /*
         {
           callType: 1,
           target: usdcArbitrumAddress,
@@ -179,6 +153,7 @@ const updateTransactionStatus = async (txHash: string, requestId: string) => {
           estimatedGas: "450000",
           chainType: "evm",
         },
+        */
         {
           callType: 1,
           target: AAVE_LENDING_POOL_ADDRESS,
@@ -192,7 +167,7 @@ const updateTransactionStatus = async (txHash: string, requestId: string) => {
           chainType: "evm",
         },
       ],
-      description: "Withdraw USDC from AAVE and swap to USDT on Binance",
+      description: "Withdraw USDC from AAVE and swap to axlUSDC on Binance",
     },
   };
 
