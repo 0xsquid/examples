@@ -35,13 +35,28 @@ const getSDK = (): Squid => {
   return squid;
 };
 
+// Function to approve the transactionRequest.target to spend fromAmount of fromToken
+const approveSpending = async (transactionRequestTarget: string, fromToken: string, fromAmount: string) => {
+  const erc20Abi = [
+    "function approve(address spender, uint256 amount) public returns (bool)"
+  ];
+  const tokenContract = new ethers.Contract(fromToken, erc20Abi, signer);
+  try {
+    const tx = await tokenContract.approve(transactionRequestTarget, fromAmount);
+    await tx.wait();
+    console.log(`Approved ${fromAmount} tokens for ${transactionRequestTarget}`);
+  } catch (error) {
+    console.error('Approval failed:', error);
+    throw error;
+  }
+};
+
 // Main function
 (async () => {
   // Initialize Squid SDK
   const squid = getSDK();
   await squid.init();
   console.log("Initialized Squid SDK");
-
 
   // Set up parameters for swapping tokens
   const params = {
@@ -63,6 +78,11 @@ const getSDK = (): Squid => {
   // Get the swap route using Squid SDK
   const { route, requestId } = await squid.getRoute(params);
   console.log("Calculated route:", route.estimate.toAmount);
+
+  const transactionRequest = route.transactionRequest;
+
+  // Approve the transactionRequest.target to spend fromAmount of fromToken
+  await approveSpending(transactionRequest.target, fromToken, amount);
 
   // Execute the swap transaction
   const tx = (await squid.executeRoute({
