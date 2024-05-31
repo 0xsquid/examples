@@ -26,7 +26,6 @@ const getRoute = async (params: any) => {
   try {
     const result = await axios.post(
       "https://apiplus.squidrouter.com/v2/route",
-
       params,
       {
         headers: {
@@ -109,6 +108,22 @@ const updateTransactionStatus = async (txHash: string, requestId: string) => {
   } while (!completedStatuses.includes(status.squidTransactionStatus));
 };
 
+// Function to approve the transactionRequest.target to spend fromAmount of fromToken
+const approveSpending = async (transactionRequestTarget: string, fromToken: string, fromAmount: string) => {
+  const erc20Abi = [
+    "function approve(address spender, uint256 amount) public returns (bool)"
+  ];
+  const tokenContract = new ethers.Contract(fromToken, erc20Abi, signer);
+  try {
+    const tx = await tokenContract.approve(transactionRequestTarget, fromAmount);
+    await tx.wait();
+    console.log(`Approved ${fromAmount} tokens for ${transactionRequestTarget}`);
+  } catch (error) {
+    console.error('Approval failed:', error);
+    throw error;
+  }
+};
+
 // Set up parameters for swapping tokens
 (async () => {
   const params = {
@@ -135,6 +150,9 @@ const updateTransactionStatus = async (txHash: string, requestId: string) => {
   console.log("requestId:", requestId);
 
   const transactionRequest = route.transactionRequest;
+
+  // Approve the transactionRequest.target to spend fromAmount of fromToken
+  await approveSpending(transactionRequest.target, fromToken, amount);
 
   // Execute the swap transaction
   const tx = await signer.sendTransaction({
