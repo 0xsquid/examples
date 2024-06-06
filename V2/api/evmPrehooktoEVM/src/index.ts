@@ -125,8 +125,7 @@ const updateTransactionStatus = async (txHash: string, requestId: string) => {
     toToken: toToken,
     toAddress: signer.address,
     slippageConfig: {
-      slippage: 30,
-      autoMode: 2,
+      autoMode: 1,
     },
     preHook: {
       chainType: "evm",
@@ -168,11 +167,11 @@ const updateTransactionStatus = async (txHash: string, requestId: string) => {
     to: transactionRequest.target,
     data: transactionRequest.data,
     value: transactionRequest.value,
-    gasPrice: await provider.getGasPrice(),
-    gasLimit: ethers.utils.hexlify(500000), // Increase gas limit
+    gasLimit: (BigInt(transactionRequest.gasLimit) * BigInt(2)).toString(),
   });
-  console.log("Transaction Hash:", tx.hash);
+
   const txReceipt = await tx.wait();
+  console.log("Transaction Hash: ", txReceipt.transactionHash);
 
   // Show the transaction receipt with Axelarscan link
   const axelarScanLink = "https://axelarscan.io/gmp/" + txReceipt.transactionHash;
@@ -180,8 +179,4 @@ const updateTransactionStatus = async (txHash: string, requestId: string) => {
 
   // Update transaction status until it completes
   await updateTransactionStatus(txReceipt.transactionHash, requestId);
-
-  // Check wETH balance
-  const wEthBalance = await wethContract.balanceOf(signer.address);
-  console.log("wETH Balance after transaction:", ethers.utils.formatEther(wEthBalance));
 })();
