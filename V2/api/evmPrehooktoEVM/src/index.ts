@@ -7,12 +7,13 @@ dotenv.config();
 const privateKey: string = process.env.PRIVATE_KEY!;
 const integratorId: string = process.env.INTEGRATOR_ID!;
 const FROM_CHAIN_RPC: string = process.env.RPC_ENDPOINT!;
-const WETH_ADDRESS: string = process.env.WETH_ADDRESS!;
+
 
 // Define chain and token addresses
 const fromChainId = "42161"; // Arbitrum
 const toChainId = "56"; // Binance Smart Chain
 const toToken = "0xe9e7CEA3DedcA5984780Bafc599bD69ADd087D56"; // BUSD on Binance
+const WETH_ADDRESS = "WETH_ADDRESS ='0x82aF49447D8a07e3bd95BD0d56f35241523fBab1";
 
 // Define amount to be wrapped and bridged
 const amount = ethers.utils.parseEther("0.0001"); // Amount in ETH
