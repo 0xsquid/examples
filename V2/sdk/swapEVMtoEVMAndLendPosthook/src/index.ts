@@ -103,7 +103,7 @@ const approveSpending = async (transactionRequestTarget: string, fromToken: stri
     toChain: toChainId,
     toToken: usdcArbitrumAddress,
     toAddress: signer.address,
-    slippage: 1,
+    slippage: 1, //optional, Squid will dynamically calculate if removed
     quoteOnly: false,
     enableBoost: true,
     postHooks: {
