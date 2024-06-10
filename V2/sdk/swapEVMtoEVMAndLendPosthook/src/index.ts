@@ -36,7 +36,7 @@ import { ChainType } from "@0xsquid/squid-types";
 // Function to get Squid SDK instance
 const getSDK = (): Squid => {
   const squid = new Squid({
-    baseUrl: "https://api.uatsquidrouter.com",
+    baseUrl: "https://apiplus.squidrouter.com",
     integratorId: integratorId,
   });
   return squid;
