@@ -149,6 +149,24 @@ const updateTransactionStatus = async (txHash: string, requestId: string) => {
   } while (!completedStatuses.includes(status.squidTransactionStatus));
 };
 
+
+// Function to approve the transactionRequest.target to spend fromAmount of fromToken
+const approveSpending = async (transactionRequestTarget: string, fromToken: string, fromAmount: string) => {
+  const erc20Abi = [
+    "function approve(address spender, uint256 amount) public returns (bool)"
+  ];
+  const tokenContract = new ethers.Contract(fromToken, erc20Abi, signer);
+  try {
+    const tx = await tokenContract.approve(transactionRequestTarget, fromAmount);
+    await tx.wait();
+    console.log(`Approved ${fromAmount} tokens for ${transactionRequestTarget}`);
+  } catch (error) {
+    console.error('Approval failed:', error);
+    throw error;
+  }
+};
+
+
 // Set up parameters for swapping tokens
 (async () => {
   // Set up parameters for swapping tokens and depositing into Radiant lending pool
@@ -161,9 +179,6 @@ const updateTransactionStatus = async (txHash: string, requestId: string) => {
     toToken: usdcArbitrumAddress,
     toAddress: signer.address,
     slippage: 1,
-    slippageConfig: {
-      autoMode: 1,
-    },
     postHook: {
       chainType: "evm",
       //fundAmount: amount,  //only required for prehooks
@@ -194,8 +209,9 @@ const updateTransactionStatus = async (txHash: string, requestId: string) => {
           chainType: "evm",
         },
       ],
-      description: "",
-      
+      provider: "Integration Test",
+      description: "Radiant Lend postHook",
+      logoURI: "https://pbs.twimg.com/profile_images/1548647667135291394/W2WOtKUq_400x400.jpg",
     },
   };
 
@@ -210,16 +226,19 @@ const updateTransactionStatus = async (txHash: string, requestId: string) => {
 
   const transactionRequest = route.transactionRequest;
 
+  // Approve the transactionRequest.target to spend fromAmount of fromToken
+  await approveSpending(transactionRequest.target, fromToken, amount);
+
   // Execute the swap transaction
   const tx = await signer.sendTransaction({
     to: transactionRequest.target,
     data: transactionRequest.data,
     value: transactionRequest.value,
-    gasPrice: await provider.getGasPrice(),
-    gasLimit: transactionRequest.gasLimit,
+    gasLimit: (BigInt(transactionRequest.gasLimit) * BigInt(2)).toString(),
   });
-  console.log("Transaction Hash:", tx.hash);
+
   const txReceipt = await tx.wait();
+  console.log("Transaction Hash: ", txReceipt.transactionHash);
 
   // Show the transaction receipt with Axelarscan link
   const axelarScanLink = "https://axelarscan.io/gmp/" + txReceipt.transactionHash;
