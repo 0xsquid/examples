@@ -130,9 +130,9 @@ const updateTransactionStatus = async (txHash: string, requestId: string) => {
       chainType: "evm",
       fundAmount: amount.toString(),
       fundToken: "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE", // Native ETH
-      provider: "Integration Test",
+      provider: "Integration Test", //This should be the name of your product or application that is triggering the hook
       description: "Wrap native ETH",
-      logoURI: "https://pbs.twimg.com/profile_images/1548647667135291394/W2WOtKUq_400x400.jpg",
+      logoURI: "https://pbs.twimg.com/profile_images/1548647667135291394/W2WOtKUq_400x400.jpg", //Add your logo here
       calls: [
         {
           chainType: "evm",

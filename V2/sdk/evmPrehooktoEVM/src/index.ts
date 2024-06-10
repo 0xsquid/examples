@@ -59,9 +59,9 @@ const getSDK = (): Squid => {
       chainType: ChainType.EVM,
       fundAmount: amount.toString(),
       fundToken: "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE", // Native ETH
-      provider: "Integration Test",
+      provider: "Integration Test", //This should be the name of your product or application that is triggering the hook
       description: "Wrap native ETH",
-      logoURI: "http://",
+      logoURI: "http://", //This should be your product or application's logo
       calls: [
         {
           chainType: ChainType.EVM,

@@ -134,9 +134,9 @@ const approveSpending = async (transactionRequestTarget: string, fromToken: stri
           estimatedGas: "50000",
         },
       ],
-      provider: "Integration Test",
-      description: "Radiant Lend postHook",
-      logoURI: "https://pbs.twimg.com/profile_images/1548647667135291394/W2WOtKUq_400x400.jpg",
+      provider: "Squid", //This should be the name of your product or application that is triggering the hook
+      description: "Radiant Lend",
+      logoURI: "https://pbs.twimg.com/profile_images/1548647667135291394/W2WOtKUq_400x400.jpg", //This should be your product or applications logo
     },
   };
   

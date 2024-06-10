@@ -209,9 +209,9 @@ const approveSpending = async (transactionRequestTarget: string, fromToken: stri
           chainType: "evm",
         },
       ],
-      provider: "Integration Test",
+      provider: "Integration Test", //This should be the name of your product or application that is triggering the hook
       description: "Radiant Lend postHook",
-      logoURI: "https://pbs.twimg.com/profile_images/1548647667135291394/W2WOtKUq_400x400.jpg",
+      logoURI: "https://pbs.twimg.com/profile_images/1548647667135291394/W2WOtKUq_400x400.jpg", //Add your product or application's logo here
     },
   };
 
