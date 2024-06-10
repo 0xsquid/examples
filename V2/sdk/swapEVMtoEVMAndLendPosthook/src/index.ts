@@ -21,6 +21,10 @@ const fromToken = "0x55d398326f99059fF775485246999027B3197955"; // Define depart
 // Define amount to be sent
 const amount = "100000000000000000";
 
+// Set up JSON RPC provider and signer using the private key and RPC URL
+const provider = new ethers.providers.JsonRpcProvider(FROM_CHAIN_RPC);
+const signer = new ethers.Wallet(privateKey, provider);
+
 // Import Radiant lending pool ABI
 import radiantLendingPoolAbi from "../abi/radiantLendingPoolAbi";
 
@@ -32,11 +36,28 @@ import { ChainType } from "@0xsquid/squid-types";
 // Function to get Squid SDK instance
 const getSDK = (): Squid => {
   const squid = new Squid({
-    baseUrl: "https://apiplus.squidrouter.com",
+    baseUrl: "https://api.uatsquidrouter.com",
     integratorId: integratorId,
   });
   return squid;
 };
+
+// Function to approve the transactionRequest.target to spend fromAmount of fromToken
+const approveSpending = async (transactionRequestTarget: string, fromToken: string, fromAmount: string) => {
+  const erc20Abi = [
+    "function approve(address spender, uint256 amount) public returns (bool)"
+  ];
+  const tokenContract = new ethers.Contract(fromToken, erc20Abi, signer);
+  try {
+    const tx = await tokenContract.approve(transactionRequestTarget, fromAmount);
+    await tx.wait();
+    console.log(`Approved ${fromAmount} tokens for ${transactionRequestTarget}`);
+  } catch (error) {
+    console.error('Approval failed:', error);
+    throw error;
+  }
+};
+
 
 // Main function
 (async () => {
@@ -85,9 +106,6 @@ const getSDK = (): Squid => {
     slippage: 1,
     quoteOnly: false,
     enableBoost: true,
-    slippageConfig: {
-      autoMode: 1,
-    },
     postHooks: {
       chainType: ChainType.EVM,
       calls: [
@@ -116,9 +134,9 @@ const getSDK = (): Squid => {
           estimatedGas: "50000",
         },
       ],
-      description: "sample",
-      logoURI: "https://v2.app.squidrouter.com/images/icons/squid_logo.svg",
-      provider: signer.address,
+      provider: "Integration Test",
+      description: "Radiant Lend postHook",
+      logoURI: "https://pbs.twimg.com/profile_images/1548647667135291394/W2WOtKUq_400x400.jpg",
     },
   };
   
@@ -128,6 +146,12 @@ const getSDK = (): Squid => {
   // Get the swap route using Squid SDK
   const { route, requestId } = await squid.getRoute(params);
   console.log("Calculated route:", route.estimate.toAmount);
+
+  const transactionRequest = route.transactionRequest;
+
+  // Approve the transactionRequest.target to spend fromAmount of fromToken
+  await approveSpending(transactionRequest.target, fromToken, amount);
+
 
   // Execute the swap transaction
   const tx = (await squid.executeRoute({
