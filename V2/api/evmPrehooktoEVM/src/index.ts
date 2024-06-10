@@ -125,16 +125,14 @@ const updateTransactionStatus = async (txHash: string, requestId: string) => {
     toChain: toChainId,
     toToken: toToken,
     toAddress: signer.address,
-    slippageConfig: {
-      autoMode: 1,
-    },
+    slippage: 1,  //optional, Squid will dynamically calculate if removed
     preHook: {
       chainType: "evm",
       fundAmount: amount.toString(),
       fundToken: "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE", // Native ETH
       provider: "Integration Test",
       description: "Wrap native ETH",
-      logoURI: "http://",
+      logoURI: "https://pbs.twimg.com/profile_images/1548647667135291394/W2WOtKUq_400x400.jpg",
       calls: [
         {
           chainType: "evm",

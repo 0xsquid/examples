@@ -54,10 +54,7 @@ const getSDK = (): Squid => {
     toChain: toChainId,
     toToken: toToken,
     toAddress: signer.address,
-    slippageConfig: {
-      autoMode: 1,
-    },
-    slippage: 1,
+    slippage: 1, //optional, Squid will dynamically calculate if removed
     preHook: {
       chainType: ChainType.EVM,
       fundAmount: amount.toString(),
