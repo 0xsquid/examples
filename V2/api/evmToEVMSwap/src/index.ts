@@ -134,10 +134,6 @@ const approveSpending = async (transactionRequestTarget: string, fromToken: stri
     toChain: toChainId,
     toToken: toToken,
     toAddress: signer.address,
-    slippage: 1,
-    slippageConfig: {
-      autoMode: 1,
-    },
   };
 
   console.log("Parameters:", params);
