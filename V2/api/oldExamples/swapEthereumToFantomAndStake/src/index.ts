@@ -1,6 +1,6 @@
 // Import necessary libraries
-import { ethers } from "ethers";
 import axios from "axios";
+import { ethers } from "ethers";
 
 // Load environment variables from .env file
 import * as dotenv from "dotenv";
@@ -92,9 +92,6 @@ const delegateEncodedData = stakingContractInterface.encodeFunctionData(
     toToken: nativeToken,
     toAddress: signer.address,
     slippage: 1,
-    slippageConfig: {
-      autoMode: 1,
-    },
     quoteOnly: false,
     // Customize contract call for staking on Fantom
     postHooks: [

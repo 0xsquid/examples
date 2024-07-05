@@ -1,6 +1,6 @@
 // Import necessary libraries
-import { ethers } from "ethers";
 import axios from "axios";
+import { ethers } from "ethers";
 
 // Load environment variables from the .env file
 import * as dotenv from "dotenv";
@@ -20,8 +20,8 @@ const nativeToken = "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE"; // Define depa
 const amount = "10000000000000000";
 
 // Import necessary ABI's
-import nftContractAbi from "../abi/squidEasterEggNftAbi";
 import erc20Abi from "../abi/erc20Abi";
+import nftContractAbi from "../abi/squidEasterEggNftAbi";
 
 // Set up JSON RPC provider and signer for source chain (Ethereum)
 const provider = new ethers.providers.JsonRpcProvider(rpcEndpoint);
@@ -95,9 +95,6 @@ const transferRemainingBalanceEncodeData =
     toToken: nativeToken,
     toAddress: signer.address,
     slippage: 1,
-    slippageConfig: {
-      autoMode: 1,
-    },
     quoteOnly: false,
     // Customize contract call for minting NFT on Polygon
     postHooks: [

@@ -1,7 +1,6 @@
 // Import necessary libraries
-import { ethers, providers } from "ethers";
 import { Squid } from "@0xsquid/sdk";
-import { ChainType } from "@0xsquid/sdk/dist/types";
+import { ethers } from "ethers";
 
 // Load environment variables from .env file
 import * as dotenv from "dotenv";
@@ -50,9 +49,6 @@ const getSDK = (): Squid => {
     toToken: nativeToken,
     toAddress: signer.address,
     slippage: 1,
-    slippageConfig: {
-      autoMode: 1,
-    },
     quoteOnly: false,
   };
 

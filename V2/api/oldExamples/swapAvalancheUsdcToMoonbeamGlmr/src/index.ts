@@ -1,6 +1,6 @@
 // Import necessary libraries
-import { ethers } from "ethers";
 import axios from "axios";
+import { ethers } from "ethers";
 
 // Load environment variables from .env file
 import * as dotenv from "dotenv";
@@ -81,9 +81,6 @@ const getStatus = async (params: any) => {
     toToken: nativeToken,
     toAddress: signer.address,
     slippage: 1,
-    slippageConfig: {
-      autoMode: 1,
-    },
   };
 
   console.log("Parameters:", params);

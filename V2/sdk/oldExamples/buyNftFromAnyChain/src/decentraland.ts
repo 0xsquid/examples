@@ -55,9 +55,6 @@ const getRoute = async (userAddress: string) => {
     toToken: config.MANAPolygon,
     toChain: config.polygonChainId,
     toAddress: config.decentralandBuyAddress,
-    slippageConfig: {
-      autoMode: 1,
-    },
     postHook: {
       chainType: ChainType.EVM,
       fundAmount: "0",
