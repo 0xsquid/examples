@@ -1,44 +1,32 @@
-// Import required libraries and types
 import { ethers } from "ethers";
 import axios from "axios";
 import * as dotenv from "dotenv";
 import { Seaport__factory } from "./Seaport__factory";
 import { SquidCallType } from "@0xsquid/sdk/dist/types";
 
-// Load environment variables from .env file
 dotenv.config();
 
-// Load sensitive data from environment variables
 const privateKey: string = process.env.PRIVATE_KEY!;
 const integratorId: string = process.env.INTEGRATOR_ID!;
 const BASE_RPC_ENDPOINT: string = process.env.BASE_RPC_ENDPOINT!;
+const OPENSEA_API_KEY: string = process.env.OPENSEA_API_KEY!;
 
 // Rarible API configuration
 const RARIBLE_API_KEY: string = "a8c97705-cab8-473e-a3cb-aff5d43a090f";
 const RARIBLE_API_URL: string = "https://api.rarible.org/v0.1";
 
-// Define chain and token addresses
 const fromChainId = "8453"; // Base chain ID
 const toChainId = "8453"; // Base chain ID (same as fromChainId for same-chain swap)
 const fromToken = "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913"; // USDC on Base
 const toToken = "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE"; // Native ETH on Base
 
-// Seaport contract address on Base
 const seaportAddress = "0x0000000000000068F116a894984e2DB1123eB395";
 
-// Set up JSON RPC provider and signer
 const provider = new ethers.providers.JsonRpcProvider(BASE_RPC_ENDPOINT);
 const signer = new ethers.Wallet(privateKey, provider);
 
-// Connect to the Seaport contract
 const seaportContract = Seaport__factory.connect(seaportAddress, signer);
 
-/**
- * Approves token spending for a given address
- * @param transactionRequestTarget Address to approve spending for
- * @param fromToken Token address to spend
- * @param fromAmount Amount to approve
- */
 const approveSpending = async (transactionRequestTarget: string, fromToken: string, fromAmount: string) => {
   const erc20Abi = [
     "function approve(address spender, uint256 amount) public returns (bool)"
@@ -54,11 +42,6 @@ const approveSpending = async (transactionRequestTarget: string, fromToken: stri
   }
 };
 
-/*
- * Gets route from Squid API
- * @param params Route parameters
- * @returns Route data and request ID
- */
 const getRoute = async (params: any) => {
   try {
     const result = await axios.post(
@@ -80,11 +63,6 @@ const getRoute = async (params: any) => {
   }
 };
 
-/*
- * Gets status of a transaction from Squid API
- * @param params Status request parameters
- * @returns Transaction status
- */
 const getStatus = async (params: any) => {
   try {
     const result = await axios.get("https://apiplus.squidrouter.com/v2/status", {
@@ -106,11 +84,6 @@ const getStatus = async (params: any) => {
   }
 };
 
-/*
- * Fetches NFT data from Rarible API
- * @param itemId NFT item ID
- * @returns NFT data
- */
 const fetchNFTData = async (itemId: string) => {
   try {
     const response = await axios.get(`${RARIBLE_API_URL}/items/${itemId}`, {
@@ -123,17 +96,11 @@ const fetchNFTData = async (itemId: string) => {
   }
 };
 
-/*
- * Gets and formats the best sell order for an NFT
- * @param nftData NFT data from Rarible
- * @returns Formatted sell order
- */
 const getBestSellOrder = async (nftData: any) => {
   if (nftData.bestSellOrder) {
     console.log("Best sell order:", JSON.stringify(nftData.bestSellOrder, null, 2));
     const order = nftData.bestSellOrder;
 
-    // Helper function to convert itemType string to number
     const getItemType = (type: string) => {
       switch (type) {
         case "NATIVE":
@@ -150,7 +117,6 @@ const getBestSellOrder = async (nftData: any) => {
       }
     };
 
-    // Helper function to convert orderType string to number
     const getOrderType = (type: string) => {
       switch (type) {
         case "FULL_OPEN":
@@ -166,7 +132,6 @@ const getBestSellOrder = async (nftData: any) => {
       }
     };
 
-    // Format offer and consideration arrays
     const formatItem = (item: any, isConsideration = false) => {
       console.log("Formatting item:", JSON.stringify(item, null, 2));
       
@@ -195,13 +160,11 @@ const getBestSellOrder = async (nftData: any) => {
     console.log("Formatted offer:", JSON.stringify(offer, null, 2));
     console.log("Formatted consideration:", JSON.stringify(consideration, null, 2));
 
-    // Handle signature (can be blank for some order types)
     let signature = order.signature || '0x';
     if (signature === '0x' && order.data && order.data.signature) {
       signature = order.data.signature;
     }
 
-    // Handle conduitKey (use the one provided in the order if available)
     const conduitKey = order.data.conduitKey || ethers.constants.HashZero;
 
     const formattedOrder = {
@@ -231,10 +194,59 @@ const getBestSellOrder = async (nftData: any) => {
   }
 };
 
-// Main function to set up and execute the NFT purchase
+async function getOpenseaFulfillmentData(tokenId: string, collectionAddress: string) {
+  const baseUri = "https://api.opensea.io/v2/";
+  const chain = 'base';
+
+  try {
+    const ordersResponse = await axios.get(
+      `${baseUri}orders/${chain}/seaport/listings?asset_contract_address=${collectionAddress}&limit=1&token_ids=${tokenId}&order_by=eth_price&order_direction=asc`,
+      {
+        headers: {
+          'X-API-KEY': OPENSEA_API_KEY,
+        },
+      }
+    );
+
+    const orders = ordersResponse.data.orders;
+    if (!orders || orders.length === 0) {
+      throw new Error("No order found");
+    }
+
+    const order = orders[0];
+
+    const fulfillmentResponse = await axios.post(
+      `${baseUri}listings/fulfillment_data`,
+      {
+        listing: {
+          hash: order.order_hash,
+          chain: chain,
+          protocol_address: order.protocol_address,
+        },
+        fulfiller: {
+          address: signer.address,
+        },
+      },
+      {
+        headers: {
+          'X-API-KEY': OPENSEA_API_KEY,
+          'Content-Type': 'application/json',
+        },
+      }
+    );
+
+    const fulfillmentData = fulfillmentResponse.data;
+    console.log("OpenSea API Raw Response:", JSON.stringify(fulfillmentData, null, 2));
+
+    return fulfillmentData;
+  } catch (error) {
+    console.error("Error fetching OpenSea data:", error);
+    throw error;
+  }
+}
+
 (async () => {
   try {
-    // Define NFT details
     const nftAddress = "0x206571b68c66e1d112b74d65695043ad2b5f95d5";
     const tokenId = "8";
     const itemId = `BASE:${nftAddress}:${tokenId}`;
@@ -245,11 +257,24 @@ const getBestSellOrder = async (nftData: any) => {
     const nftData = await fetchNFTData(itemId);
     console.log("NFT data:", JSON.stringify(nftData, null, 2));
 
-    // Get the best sell order for the NFT
+    // Get the best sell order for the NFT from Rarible
     const bestSellOrder = await getBestSellOrder(nftData);
     console.log("Best sell order formatted:", JSON.stringify(bestSellOrder, null, 2));
 
-    // Encode the fulfillAdvancedOrder function call
+    // Fetch OpenSea data
+    console.log("Fetching OpenSea data...");
+    const openseaData = await getOpenseaFulfillmentData(tokenId, nftAddress);
+
+    // Extract signature and value from OpenSea data
+    const openseaSignature = openseaData.fulfillment_data.orders[0].signature;
+    const openseaValue = openseaData.fulfillment_data.transaction.value.toString();
+
+    console.log("OpenSea Signature:", openseaSignature);
+    console.log("OpenSea Value:", openseaValue);
+
+    // Use OpenSea signature in the order
+    bestSellOrder.signature = openseaSignature;
+
     const fulfillAdvancedOrderCalldata = seaportContract.interface.encodeFunctionData(
       "fulfillAdvancedOrder",
       [
@@ -257,27 +282,21 @@ const getBestSellOrder = async (nftData: any) => {
           parameters: bestSellOrder.parameters,
           numerator: bestSellOrder.numerator,
           denominator: bestSellOrder.denominator,
-          signature: bestSellOrder.signature,
+          signature: openseaSignature, // Use OpenSea signature
           extraData: bestSellOrder.extraData,
         },
         [], // criteriaResolvers (empty for basic orders)
-        bestSellOrder.parameters.conduitKey, // Use the conduitKey from the order
+        bestSellOrder.parameters.conduitKey,
         signer.address // recipient
       ]
     );
     console.log("fulfillAdvancedOrder calldata:", fulfillAdvancedOrderCalldata);
 
-    // Calculate the total consideration amount
-    const totalConsiderationAmount = bestSellOrder.parameters.consideration.reduce((total, item) => {
-      return total.add(ethers.BigNumber.from(item.startAmount));
-    }, ethers.BigNumber.from(0));
-
-    // Prepare parameters for the Squid API route
     const params = {
       fromAddress: signer.address,
       fromChain: fromChainId,
       fromToken: fromToken,
-      fromAmount: '240000', // TODO: Use totalConsiderationAmount.toString() in production
+      fromAmount: "210000", // Use OpenSea value
       toChain: toChainId,
       toToken: toToken,
       toAddress: signer.address,
@@ -288,7 +307,7 @@ const getBestSellOrder = async (nftData: any) => {
           {
             callType: SquidCallType.DEFAULT,
             target: seaportAddress,
-            value: '56000000000000', // TODO: Use totalConsiderationAmount.toString() in production
+            value: openseaValue, // Use OpenSea value
             callData: fulfillAdvancedOrderCalldata,
             payload: {
               tokenAddress: toToken,
@@ -370,7 +389,7 @@ const getBestSellOrder = async (nftData: any) => {
         }
 
         if (!completedStatuses.includes(status.squidTransactionStatus)) {
-          await new Promise((resolve) => setTimeout(resolve, 5000));
+            await new Promise((resolve) => setTimeout(resolve, 5000));
         }
       } while (!completedStatuses.includes(status.squidTransactionStatus));
     };
