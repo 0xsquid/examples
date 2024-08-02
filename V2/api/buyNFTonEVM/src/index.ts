@@ -4,25 +4,33 @@ import * as dotenv from "dotenv";
 import { Seaport__factory } from "./Seaport__factory";
 import { SquidCallType } from "@0xsquid/sdk/dist/types";
 
+// Load environment variables
 dotenv.config();
 
+// Environment variables
 const privateKey: string = process.env.PRIVATE_KEY!;
 const integratorId: string = process.env.INTEGRATOR_ID!;
 const BASE_RPC_ENDPOINT: string = process.env.BASE_RPC_ENDPOINT!;
 const OPENSEA_API_KEY: string = process.env.OPENSEA_API_KEY!;
 
+// Configuration constants
 const fromChainId = "8453"; // Base chain ID
 const toChainId = "8453"; // Base chain ID (same as fromChainId for same-chain swap)
 const fromToken = "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913"; // USDC on Base
 const toToken = "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE"; // Native ETH on Base
+const nftAddress = "0x42cfd17866eb1c94789d18c6538aaca25a7c95b5"; // NFT contract address
+const tokenId = "4039"; // NFT token ID
 
 const seaportAddress = "0x0000000000000068F116a894984e2DB1123eB395";
 
+// Set up provider and signer
 const provider = new ethers.providers.JsonRpcProvider(BASE_RPC_ENDPOINT);
 const signer = new ethers.Wallet(privateKey, provider);
 
+// Connect to Seaport contract
 const seaportContract = Seaport__factory.connect(seaportAddress, signer);
 
+// Function to approve token spending
 const approveSpending = async (transactionRequestTarget: string, fromToken: string, fromAmount: string) => {
   const erc20Abi = [
     "function approve(address spender, uint256 amount) public returns (bool)"
@@ -38,6 +46,7 @@ const approveSpending = async (transactionRequestTarget: string, fromToken: stri
   }
 };
 
+// Function to get route from Squid API
 const getRoute = async (params: any) => {
   try {
     const result = await axios.post(
@@ -59,6 +68,7 @@ const getRoute = async (params: any) => {
   }
 };
 
+// Function to get transaction status from Squid API
 const getStatus = async (params: any) => {
   try {
     const result = await axios.get("https://apiplus.squidrouter.com/v2/status", {
@@ -80,11 +90,70 @@ const getStatus = async (params: any) => {
   }
 };
 
+// Function to get token information from Squid API
+const getTokens = async () => {
+  try {
+    const result = await axios.get('https://apiplus.squidrouter.com/v2/sdk-info', {
+      headers: {
+        'x-integrator-id': integratorId,
+      },
+    });
+    return result.data.tokens;
+  } catch (error) {
+    console.error("Error fetching token data:", error);
+    return [];
+  }
+};
+
+// Function to find a specific token in the token list
+function findToken(tokens: any[], address: string, chainId: string) {
+  if (!Array.isArray(tokens)) {
+    console.error("Invalid tokens data structure");
+    return null;
+  }
+  
+  return tokens.find(t => 
+    t.address.toLowerCase() === address.toLowerCase() && 
+    t.chainId === chainId
+  );
+}
+
+// Function to print token information
+function printTokenInfo(token: any) {
+  if (token) {
+    console.log(`Token on chain ${token.chainId}:`);
+    console.log(`  Symbol: ${token.symbol}`);
+    console.log(`  Name: ${token.name}`);
+    console.log(`  Address: ${token.address}`);
+    console.log(`  Decimals: ${token.decimals}`);
+  } else {
+    console.log(`Token not found`);
+  }
+}
+
+// Function to calculate the amount of fromToken needed
+function calculateFromAmount(openseaValue: string, fromToken: any, toToken: any): string {
+  const fromTokenDecimals = fromToken.decimals;
+  const toTokenDecimals = toToken.decimals;
+  const fromTokenUsdPrice = fromToken.usdPrice;
+  const toTokenUsdPrice = toToken.usdPrice;
+
+  const openseaValueBigInt = BigInt(openseaValue);
+  const ethToUsdcRate = toTokenUsdPrice / fromTokenUsdPrice;
+  const usdcAmount = Number(openseaValueBigInt) / (10 ** toTokenDecimals) * ethToUsdcRate;
+  const usdcAmountWithOverestimate = usdcAmount * 1.015;
+  const fromAmount = Math.ceil(usdcAmountWithOverestimate * (10 ** fromTokenDecimals)).toString();
+
+  return fromAmount;
+}
+
+// Function to get OpenSea fulfillment data
 async function getOpenseaFulfillmentData(tokenId: string, collectionAddress: string) {
   const baseUri = "https://api.opensea.io/v2/";
   const chain = 'base';
 
   try {
+    // Get orders from OpenSea API
     const ordersResponse = await axios.get(
       `${baseUri}orders/${chain}/seaport/listings?asset_contract_address=${collectionAddress}&limit=1&token_ids=${tokenId}&order_by=eth_price&order_direction=asc`,
       {
@@ -101,6 +170,7 @@ async function getOpenseaFulfillmentData(tokenId: string, collectionAddress: str
 
     const order = orders[0];
 
+    // Get fulfillment data from OpenSea API
     const fulfillmentResponse = await axios.post(
       `${baseUri}listings/fulfillment_data`,
       {
@@ -124,6 +194,7 @@ async function getOpenseaFulfillmentData(tokenId: string, collectionAddress: str
     const fulfillmentData = fulfillmentResponse.data;
     console.log("OpenSea API Raw Response:", JSON.stringify(fulfillmentData, null, 2));
 
+    // Format the order data
     const openseaOrder = fulfillmentData.fulfillment_data.orders[0];
     const formattedOrder = {
       parameters: {
@@ -155,12 +226,30 @@ async function getOpenseaFulfillmentData(tokenId: string, collectionAddress: str
   }
 }
 
+// Main execution function
 (async () => {
   try {
-    const nftAddress = "0x206571b68c66e1d112b74d65695043ad2b5f95d5";
-    const tokenId = "8";
-
     console.log("Selected NFT:", `${nftAddress}:${tokenId}`);
+
+    // Fetch token information
+    const tokens = await getTokens();
+
+    if (!Array.isArray(tokens)) {
+      throw new Error("Unexpected token data structure");
+    }
+
+    const fromTokenInfo = findToken(tokens, fromToken, fromChainId);
+    const toTokenInfo = findToken(tokens, toToken, toChainId);
+
+    if (!fromTokenInfo || !toTokenInfo) {
+      throw new Error("Unable to find token information");
+    }
+
+    console.log("From Token:");
+    printTokenInfo(fromTokenInfo);
+
+    console.log("\nTo Token:");
+    printTokenInfo(toTokenInfo);
 
     // Fetch OpenSea data
     console.log("Fetching OpenSea data...");
@@ -172,6 +261,7 @@ async function getOpenseaFulfillmentData(tokenId: string, collectionAddress: str
     console.log("Best sell order formatted:", JSON.stringify(bestSellOrder, null, 2));
     console.log("OpenSea Value:", openseaValue);
 
+    // Encode the fulfillAdvancedOrder function call
     const fulfillAdvancedOrderCalldata = seaportContract.interface.encodeFunctionData(
       "fulfillAdvancedOrder",
       [
@@ -189,11 +279,15 @@ async function getOpenseaFulfillmentData(tokenId: string, collectionAddress: str
     );
     console.log("fulfillAdvancedOrder calldata:", fulfillAdvancedOrderCalldata);
 
+    // Calculate the amount of fromToken needed
+    const calculatedFromAmount = calculateFromAmount(openseaValue, fromTokenInfo, toTokenInfo);
+
+    // Prepare parameters for the Squid API route request
     const params = {
       fromAddress: signer.address,
       fromChain: fromChainId,
       fromToken: fromToken,
-      fromAmount: "600000", // Hardcoded value, you might want to adjust this
+      fromAmount: calculatedFromAmount,
       toChain: toChainId,
       toToken: toToken,
       toAddress: signer.address,
@@ -220,6 +314,7 @@ async function getOpenseaFulfillmentData(tokenId: string, collectionAddress: str
       },
     };
 
+    console.log("Calculated fromAmount:", calculatedFromAmount);
     console.log("Parameters:", params);
     console.log("PostHook:", JSON.stringify(params.postHook, null, 2));
 
