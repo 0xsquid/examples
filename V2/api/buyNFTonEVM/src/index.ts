@@ -14,10 +14,10 @@ const BASE_RPC_ENDPOINT: string = process.env.BASE_RPC_ENDPOINT!;
 const OPENSEA_API_KEY: string = process.env.OPENSEA_API_KEY!;
 
 // Configuration constants
-const fromChainId = "8453"; // Base chain ID
-const toChainId = "8453"; // Base chain ID (same as fromChainId for same-chain swap)
-const fromToken = "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913"; // USDC on Base
-const toToken = "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE"; // Native ETH on Base
+const fromChainId = "8453"; // Set the chain you're liquidity is coming from 
+const toChainId = "8453"; // Set the destination chain you are buying 
+const fromToken = "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913"; // Set the asset you want to purchase with
+const toToken = "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE"; // Set the asset the actual purchase is occurring with
 const nftAddress = "0x42cfd17866eb1c94789d18c6538aaca25a7c95b5"; // NFT contract address
 const tokenId = "4039"; // NFT token ID
 
