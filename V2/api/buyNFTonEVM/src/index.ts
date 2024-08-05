@@ -1,3 +1,6 @@
+//To use this example replace the configuration constants to match the values of the NFT you want to purchase and the chain and asset you want to purchase it with
+
+//imports
 import { ethers } from "ethers";
 import axios from "axios";
 import * as dotenv from "dotenv";
