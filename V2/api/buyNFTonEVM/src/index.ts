@@ -3,6 +3,7 @@ import axios from "axios";
 import * as dotenv from "dotenv";
 import { Seaport__factory } from "./Seaport__factory";
 import { SquidCallType } from "@0xsquid/sdk/dist/types";
+import { erc1155Abi } from "./abi/erc1155Abi";
 
 // Load environment variables
 dotenv.config();
@@ -19,7 +20,7 @@ const toChainId = "8453"; // Set the destination chain you are buying
 const fromToken = "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913"; // Set the asset you want to purchase with
 const toToken = "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE"; // Set the asset the actual purchase is occurring with
 const nftAddress = "0x42cfd17866eb1c94789d18c6538aaca25a7c95b5"; // NFT contract address
-const tokenId = "4039"; // NFT token ID
+const tokenId = "1638"; // NFT token ID
 
 const seaportAddress = "0x0000000000000068F116a894984e2DB1123eB395";
 
@@ -261,6 +262,8 @@ async function getOpenseaFulfillmentData(tokenId: string, collectionAddress: str
     console.log("Best sell order formatted:", JSON.stringify(bestSellOrder, null, 2));
     console.log("OpenSea Value:", openseaValue);
 
+
+
     // Encode the fulfillAdvancedOrder function call
     const fulfillAdvancedOrderCalldata = seaportContract.interface.encodeFunctionData(
       "fulfillAdvancedOrder",
@@ -278,6 +281,19 @@ async function getOpenseaFulfillmentData(tokenId: string, collectionAddress: str
       ]
     );
     console.log("fulfillAdvancedOrder calldata:", fulfillAdvancedOrderCalldata);
+
+    //encode 1155 transfer data 
+    const erc1155Interface = new ethers.utils.Interface(erc1155Abi);
+    const nftTransferCallData = erc1155Interface.encodeFunctionData(
+        "safeTransferFrom(address, address, uint256, uint256, bytes)",
+        [
+            '0xEa749Fd6bA492dbc14c24FE8A3d08769229b896c', //Squid EVM Multicall
+            signer.address,
+            tokenId,
+            1,
+            "0x",
+        ]
+        );
 
     // Calculate the amount of fromToken needed
     const calculatedFromAmount = calculateFromAmount(openseaValue, fromTokenInfo, toTokenInfo);
@@ -300,6 +316,30 @@ async function getOpenseaFulfillmentData(tokenId: string, collectionAddress: str
             target: seaportAddress,
             value: openseaValue,
             callData: fulfillAdvancedOrderCalldata,
+            payload: {
+              tokenAddress: toToken,
+              inputPos: 1
+            },
+            estimatedGas: "2000000",
+            chainType: "evm",
+          },
+          {
+            callType: SquidCallType.DEFAULT,
+            target: nftAddress,
+            value: "0",
+            callData: nftTransferCallData, //update call data
+            payload: {
+              tokenAddress: nftAddress,
+              inputPos: 1
+            },
+            estimatedGas: "2000000",
+            chainType: "evm",
+          },
+          {
+            callType: "2",
+            target: signer.address,
+            value: "0",
+            callData: "0x", //update call data
             payload: {
               tokenAddress: toToken,
               inputPos: 1
