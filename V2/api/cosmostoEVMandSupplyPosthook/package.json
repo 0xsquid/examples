@@ -1,0 +1,18 @@
+{
+	"scripts": {
+		"start": "ts-node src/index.ts"
+	},
+	"dependencies": {
+		"@cosmjs/proto-signing": "^0.32.4",
+		"@cosmjs/stargate": "^0.32.4",
+		"@keplr-wallet/unit": "^0.12.119",
+		"axios": "^1.7.3",
+		"cosmjs-types": "^0.9.0",
+		"dotenv": "^16.4.5",
+		"ethers": "^5.7.2"
+	},
+	"devDependencies": {
+		"@types/node": "^20.11.24"
+	},
+	"license": "MIT"
+}

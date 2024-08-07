@@ -1,4 +1,4 @@
-//cosmos to EVM swap using api
+//cosmos to EVM swap using api with postHook
 
 //imports
 import axios from "axios";
@@ -10,6 +10,7 @@ import { MsgExecuteContract } from "cosmjs-types/cosmwasm/wasm/v1/tx";
 import { coin } from "@cosmjs/stargate";
 import { Dec } from "@keplr-wallet/unit";
 import * as dotenv from "dotenv";
+import { ethers } from "ethers";
 dotenv.config();
 
 // Load environment variables
@@ -19,19 +20,49 @@ const osmosisRPC = process.env.OSMOSIS_RPC_ENDPOINT;
 
 // Define chain and token addresses
 const fromChainId = "osmosis-1";
-const toChainId = "8453"; // Base
+const toChainId = "42161"; // Arbitrum
 const fromToken = "uosmo"; // Osmosis native token
-const toToken = "0xEB466342C4d449BC9f53A865D5Cb90586f405215"; // axlUSDC on Base
+const toToken = "0xaf88d065e77c8cc2239327c5edb3a432268e5831"; // USDC on Arbitrum
 const toAddress = 'SET AN EVM toAddress' //Set toAddress as your recipient 
 
 // Define the amount to be sent (in uosmo)
-const amount = "1000000"; // 1 OSMO
+const amount = "3000000"; // 1 OSMO
 
+// Aave pool address on Arbitrum
+const aavePoolAddress = "0x794a61358D6845594F94dc1DB02A252b5b4814aD";
+
+// ERC20 approve ABI 
+const erc20Abi = [
+  "function approve(address spender, uint256 amount) public returns (bool)"
+];
+
+// Aave pool supply ABI 
+const aavePoolAbi = [
+  "function supply(address asset, uint256 amount, address onBehalfOf, uint16 referralCode) external"
+];
+
+// Create contract interfaces
+const erc20Interface = new ethers.utils.Interface(erc20Abi);
+const aavePoolInterface = new ethers.utils.Interface(aavePoolAbi);
+
+// Generate calldata for approve
+const approveCalldata = erc20Interface.encodeFunctionData("approve", [
+  aavePoolAddress,
+  ethers.constants.MaxUint256 // Approve max amount
+]);
+
+// Generate calldata for supply
+const supplyCalldata = aavePoolInterface.encodeFunctionData("supply", [
+  toToken, // asset (USDC on Arbitrum)
+  0, // amount (will be filled by Squid)
+  toAddress, // onBehalfOf (will be replaced with actual address)
+  0 // referralCode
+]);
 // Function to get the optimal route for the swap using Squid API
 const getRoute = async (params: any) => {
   try {
     const result = await axios.post(
-      "https://apiplus.squidrouter.com/v2/route",
+      "https://api.uatsquidrouter.com/v2/route",
       params,
       {
         headers: {
@@ -54,7 +85,7 @@ const getRoute = async (params: any) => {
 // Function to get the status of the transaction using Squid API
 const getStatus = async (params: any) => {
   try {
-    const result = await axios.get("https://apiplus.squidrouter.com/v2/status", {
+    const result = await axios.get("https://api.uatsquidrouter.com/v2/status", {
       params: {
         transactionId: params.transactionId,
         requestId: params.requestId,
@@ -141,6 +172,39 @@ const updateTransactionStatus = async (txHash: string, requestId: string) => {
       toChain: toChainId,
       toToken: toToken,
       toAddress: toAddress,
+      slippage: 1,
+      postHook: {
+        chainType: "evm",
+        calls: [
+          {
+            callType: 1,
+            target: toToken,
+            value: "0",
+            callData: approveCalldata,
+            payload: {
+              tokenAddress: toToken,
+              inputPos: "1",
+            },
+            estimatedGas: "150000",
+            chainType: "evm",
+          },
+          {
+            callType: 1,
+            target: aavePoolAddress,
+            value: "0",
+            callData: supplyCalldata,
+            payload: {
+              tokenAddress: toToken,
+              inputPos: "1",
+            },
+            estimatedGas: "150000",
+            chainType: "evm",
+          },
+        ],
+        provider: "Test",
+        description: "Test arb post hook",
+        logoURI: "https://valoraapp.com/favicon.ico",
+      },
     };
 
     console.log("Parameters:", params);
@@ -172,8 +236,8 @@ const updateTransactionStatus = async (txHash: string, requestId: string) => {
     const gasPrice = GasPrice.fromString(route.transactionRequest.gasPrice);
 
     // Set a higher default gas limit and apply a multiplier
-    const defaultGasLimit = 1000000; // Increased from 500000
-    const gasLimitMultiplier = 2; // Increased from 1.5
+    const defaultGasLimit = 1000000;
+    const gasLimitMultiplier = 2;
     const gasLimit = Math.ceil(
       (parseInt(route.transactionRequest.gasLimit) || defaultGasLimit) * gasLimitMultiplier
     ).toString();
@@ -195,7 +259,7 @@ const updateTransactionStatus = async (txHash: string, requestId: string) => {
       account.address,
       [msg],
       fee,
-      "Squid cross-chain swap"
+      "Squid cross-chain swap with Aave deposit"
     );
 
     console.log("Transaction Hash:", tx.transactionHash);
@@ -207,5 +271,6 @@ const updateTransactionStatus = async (txHash: string, requestId: string) => {
     // Update transaction status until it completes
     await updateTransactionStatus(tx.transactionHash, requestId);
   } catch (error) {
+    console.error("Error:", error);
   }
 })();
