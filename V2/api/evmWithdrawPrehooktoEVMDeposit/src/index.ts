@@ -1,4 +1,4 @@
-//withdraw from aave on arbitrum with squid then deposit into aave on optimism with squid.
+//imports
 import { ethers } from "ethers";
 import axios from "axios";
 import * as dotenv from "dotenv";
