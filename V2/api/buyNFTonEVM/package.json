@@ -1,0 +1,14 @@
+{
+	"scripts": {
+		"start": "ts-node src/index.ts"
+	},
+	"dependencies": {
+		"@opensea/seaport-js": "^4.0.4",
+		"axios": "^1.7.2",
+		"dotenv": "^16.4.5",
+		"ethers": "^5.7.2"
+	},
+	"devDependencies": {
+		"@types/node": "^20.12.12"
+	}
+}
