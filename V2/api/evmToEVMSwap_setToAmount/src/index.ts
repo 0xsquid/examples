@@ -62,8 +62,8 @@ function calculateFromAmountBasedOnToAmount(toAmount: string, fromToken: any, to
   // Calculate the amount of fromToken needed to match this USD value
   const fromAmountNumber = usdValue / fromTokenUsdPrice;
 
-  // Add a 0.5% buffer for price fluctuations and fees
-  const fromAmountWithBuffer = fromAmountNumber * 1.005;
+  // Add a 1% buffer for price fluctuations and fees
+  const fromAmountWithBuffer = fromAmountNumber * 1.01;
 
   // Convert back to the fromToken's decimal representation and round up
   const fromAmount = Math.ceil(fromAmountWithBuffer * (10 ** fromTokenDecimals)).toString();
