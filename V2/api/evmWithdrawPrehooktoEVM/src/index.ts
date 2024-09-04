@@ -113,9 +113,9 @@ const approveSpending = async (transactionRequestTarget: string, tokenAmount: st
           chainType: "evm",
         },
       ],
-      provider: "Test",
-      description: "Test Arbitrum preHook",
-      logoURI: "https://valoraapp.com/favicon.ico",
+      provider: "Aave",
+      description: "Aave Withdraw",
+      logoURI: "https://app.aave.com/favicon.ico",
     },
   };
 
