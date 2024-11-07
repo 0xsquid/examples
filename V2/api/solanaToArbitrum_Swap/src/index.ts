@@ -13,7 +13,7 @@ const SOLANA_RPC: string = process.env.SOLANA_RPC_ENDPOINT || "https://api.mainn
 const fromChainId = "solana-mainnet-beta";
 const toChainId = "42161"; // Arbitrum
 const fromToken = "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee"; // SOL
-const toToken = "0x912ce59144191c1204e64559fe8253a0e49e6548"; // ARB
+const toToken = "0xaf88d065e77c8cC2239327C5EDb3A432268e5831"; // USDC
 
 // Set up Solana connection and wallet
 const connection = new Connection(SOLANA_RPC, "confirmed");
@@ -113,7 +113,7 @@ const executeSwap = async () => {
     fromAddress: wallet.publicKey.toString(),
     fromChain: fromChainId,
     fromToken: fromToken,
-    fromAmount: "150000000", // Amount in lamports (1 SOL = 1e9 lamports)
+    fromAmount: "25000000", // Amount in lamports (1 SOL = 1e9 lamports)
     toChain: toChainId,
     toToken: toToken,
     toAddress: "0xC601C9100f8420417A94F6D63e5712C21029525e",
