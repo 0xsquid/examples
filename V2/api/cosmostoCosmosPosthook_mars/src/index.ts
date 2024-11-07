@@ -47,20 +47,47 @@ const osmosisRPC = process.env.OSMOSIS_RPC_ENDPOINT;
       postHook: {
         calls: [
           {
-            contract: "osmo1c3ljch9dfw5kf52nfwpxd2zmj2ese7agnx0p9tenkrryasrle5sqf3ftpg",
             msg: {
-              deposit: {
-                on_behalf_of: "osmo136gxfadc5dg2aejc6twaltt9rqv39qzywatf05",
-              }
-            }
-          }
+              wasm: {
+                execute: {
+                  contract_addr:
+                    "osmo1c3ljch9dfw5kf52nfwpxd2zmj2ese7agnx0p9tenkrryasrle5sqf3ftpg",
+                  msg: {
+                    deposit: {
+                      on_behalf: "osmo136gxfadc5dg2aejc6twaltt9rqv39qzywatf05",
+                    },
+                  },
+                  funds: [
+                    {
+                      denom: "uosmo",
+                      amount: "0",
+                    },
+                  ],
+                },
+              },
+            },
+            actions: [
+              {
+                native_balance_fetch: {
+                  denom: "uosmo",
+                  replacer: "/wasm/execute/funds/0/amount",
+                },
+              },
+              {
+                field_to_binary: {
+                  replacer: "/wasm/execute/msg",
+                },
+              },
+            ],
+          },
         ],
         chainType: "cosmos",
         callType: 2,
         provider: "Saga",
         description: "Saga PoC",
-        logoURI: "https://pbs.twimg.com/profile_images/1508474357315616768/zcPXETKs_400x400.jpg"
-      }
+        logoURI:
+          "https://pbs.twimg.com/profile_images/1508474357315616768/zcPXETKs_400x400.jpg",
+      },
     };
 
     // Get the swap route using Squid API
