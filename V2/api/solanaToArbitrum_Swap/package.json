@@ -3,6 +3,7 @@
 		"start": "ts-node src/index.ts"
 	},
 	"dependencies": {
+		"@chainflip/sdk": "^1.6.6",
 		"@solana/web3.js": "^1.95.4",
 		"axios": "^1.7.7",
 		"bs58": "^6.0.0",
