@@ -48,15 +48,16 @@ const getRoute = async (params: any) => {
   }
 };
 
-// Function to get the status of the transaction
+// Function to get status
 const getStatus = async (params: any) => {
   try {
     const result = await axios.get("https://api.uatsquidrouter.com/v2/status", {
       params: {
-        transactionId: params.transactionId,
+        transactionId: params.chainflipId, // Using chainflipId
         requestId: params.requestId,
-        fromChainId: params.fromChainId,
-        toChainId: params.toChainId,
+        fromChainId: fromChainId,
+        toChainId: toChainId,
+        bridgeType: "chainflip" // Added bridge type
       },
       headers: {
         "x-integrator-id": integratorId,
@@ -72,13 +73,13 @@ const getStatus = async (params: any) => {
   }
 };
 
-// Function to periodically check the transaction status
-const updateTransactionStatus = async (txHash: string, requestId: string) => {
+// Function to check transaction status
+const updateTransactionStatus = async (chainflipId: string, requestId: string) => {
   const getStatusParams = {
-    transactionId: txHash,
-    requestId: requestId,
-    fromChainId: fromChainId,
-    toChainId: toChainId,
+    chainflipId,
+    requestId,
+    fromChainId,
+    toChainId
   };
 
   let status;
@@ -178,7 +179,7 @@ const createAndBroadcastTransaction = async (
 };
 
 // Execute the swap
-const executeSwap = async () => {
+(async () => {
   try {
     const sourceAddress = bitcoin.payments.p2wpkh({ pubkey: keyPair.publicKey, network: BITCOIN_NETWORK }).address!;
 
@@ -201,8 +202,10 @@ const executeSwap = async () => {
     const routeResult = await getRoute(params);
     const route = routeResult.data.route;
     const requestId = routeResult.requestId;
+    const chainflipId = route.transactionRequest.chainflipId; // Get chainflipId from route
     console.log("Calculated route:", route);
     console.log("requestId:", requestId);
+    console.log("chainflipId:", chainflipId);
 
     const transactionRequest = route.transactionRequest;
 
@@ -214,16 +217,13 @@ const executeSwap = async () => {
     );
     
     console.log("Transaction Hash:", txHash);
-    console.log(`Finished! Check block explorer: https://mempool.space/tx/${txHash}`);
+    console.log(`Bitcoin Explorer: https://mempool.space/tx/${txHash}`);
 
-    // Monitor the cross-chain transfer
-    await updateTransactionStatus(txHash, requestId);
+    // Monitor using chainflipId instead of transaction hash
+    await updateTransactionStatus(chainflipId, requestId);
 
   } catch (error) {
     console.error("Error executing swap:", error);
     throw error;
   }
-};
-
-// Execute the swap
-executeSwap().catch(console.error);
+})();
