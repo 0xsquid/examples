@@ -153,7 +153,7 @@ const createAndBroadcastTransaction = async (
     });
 
     // Add change output if necessary (assuming 500 sats fee)
-    const fee = BigInt(500);
+    const fee = BigInt(800);
     const changeAmount = totalInput - amount - fee;
     if (changeAmount > BigInt(546)) { // Dust threshold
       psbt.addOutput({
