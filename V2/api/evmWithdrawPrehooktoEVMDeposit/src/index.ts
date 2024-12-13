@@ -87,7 +87,7 @@ const approveSpending = async (transactionRequestTarget: string, tokenAmount: st
   const withdrawData = aaveArbitrumPoolContract.interface.encodeFunctionData("withdraw", [
     fromToken,
     amount,
-    "0xEa749Fd6bA492dbc14c24FE8A3d08769229b896c" // Squid multi-router address
+    "0xaD6Cea45f98444a922a2b4fE96b8C90F0862D2F4" // Squid multi-router address
   ]);
 
   // Construct the supply function call data
