@@ -290,7 +290,7 @@ async function getOpenseaFulfillmentData(tokenId: string, collectionAddress: str
     const nftTransferCallData = erc1155Interface.encodeFunctionData(
         "safeTransferFrom(address, address, uint256, uint256, bytes)",
         [
-            '0xEa749Fd6bA492dbc14c24FE8A3d08769229b896c', //Squid EVM Multicall
+            '0xaD6Cea45f98444a922a2b4fE96b8C90F0862D2F4', //Squid EVM Multicall
             signer.address,
             tokenId,
             1,
