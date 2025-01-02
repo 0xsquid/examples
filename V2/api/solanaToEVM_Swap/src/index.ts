@@ -19,6 +19,11 @@ const toToken = "0xaf88d065e77c8cC2239327C5EDb3A432268e5831"; //USDC
 const connection = new Connection(SOLANA_RPC, "confirmed");
 const wallet = Keypair.fromSecretKey(bs58.decode(privateKey));
 
+// Add helper function to determine bridge type
+const getBridgeType = (toChain: string): string => {
+  return toChain === "42161" ? "chainflip" : "chainflipmultihop";
+};
+
 // Function to get route from Squid
 const getRoute = async (params: any) => {
   try {
@@ -46,13 +51,12 @@ const getRoute = async (params: any) => {
 // Function to get status
 const getStatus = async (params: any) => {
   try {
-    const result = await axios.get("https://api.uatsquidrouter.com/v2/status", {
+    const result = await axios.get("https://apiplus.squidrouter.com/v2/status", {
       params: {
-        transactionId: params.chainflipId, // Using chainflipId
-        requestId: params.requestId,
+        transactionId: params.chainflipId,
         fromChainId: fromChainId,
         toChainId: toChainId,
-        bridgeType: "chainflip" // Added bridge type
+        bridgeType: getBridgeType(toChainId)
       },
       headers: {
         "x-integrator-id": integratorId,
@@ -72,9 +76,9 @@ const getStatus = async (params: any) => {
 const updateTransactionStatus = async (chainflipId: string, requestId: string) => {
   const getStatusParams = {
     chainflipId,
-    requestId,
     fromChainId,
-    toChainId
+    toChainId,
+    bridgeType: getBridgeType(toChainId)
   };
 
   let status;
@@ -107,18 +111,40 @@ const updateTransactionStatus = async (chainflipId: string, requestId: string) =
   } while (!completedStatuses.includes(status.squidTransactionStatus));
 };
 
+// Add new function to get deposit address
+const getDepositAddress = async (transactionRequest: any) => {
+  try {
+    const result = await axios.post(
+      "https://apiplus.squidrouter.com/v2/deposit-address",
+      transactionRequest,
+      {
+        headers: {
+          "x-integrator-id": integratorId,
+          "Content-Type": "application/json",
+        },
+      }
+    );
+    return result.data;
+  } catch (error: any) {
+    if (error.response) {
+      console.error("API error:", error.response.data);
+    }
+    console.error("Error getting deposit address:", error);
+    throw error;
+  }
+};
+
 // Execute the swap
 (async () => {
   const params = {
     fromAddress: wallet.publicKey.toString(),
     fromChain: fromChainId,
     fromToken: fromToken,
-    fromAmount: "110000000", // Amount in lamports
+    fromAmount: "150000000", // Amount in lamports
     toChain: toChainId,
     toToken: toToken,
     toAddress: "0xC601C9100f8420417A94F6D63e5712C21029525e",
-    quoteOnly: false,
-    enableBoost: true
+    quoteOnly: false
   };
 
   console.log("Parameters:", params);
@@ -126,19 +152,17 @@ const updateTransactionStatus = async (chainflipId: string, requestId: string) =
   const routeResult = await getRoute(params);
   const route = routeResult.data.route;
   const requestId = routeResult.requestId;
-  const chainflipId = route.transactionRequest.chainflipId; // Get chainflipId from route
-  console.log("Calculated route:", route);
-  console.log("requestId:", requestId);
-  console.log("chainflipId:", chainflipId);
+  
+  // Get deposit address using transaction request
+  const depositAddressResult = await getDepositAddress(route.transactionRequest);
+  console.log("Deposit address result:", depositAddressResult);
 
-  const transactionRequest = route.transactionRequest;
-
-  // Create Solana transaction
+  // Create Solana transaction with deposit address
   const transaction = new Transaction().add(
     SystemProgram.transfer({
       fromPubkey: wallet.publicKey,
-      toPubkey: new PublicKey(transactionRequest.target),
-      lamports: parseInt(transactionRequest.value),
+      toPubkey: new PublicKey(depositAddressResult.depositAddress),
+      lamports: parseInt(depositAddressResult.amount),
     })
   );
 
@@ -151,8 +175,11 @@ const updateTransactionStatus = async (chainflipId: string, requestId: string) =
     console.log("Transaction Hash:", signature);
     console.log(`Solscan: https://solscan.io/tx/${signature}`);
 
-    // Monitor using chainflipId instead of transaction hash
-    await updateTransactionStatus(chainflipId, requestId);
+    // Monitor using chainflipStatusTrackingId with determined bridge type
+    await updateTransactionStatus(
+      depositAddressResult.chainflipStatusTrackingId, 
+      requestId
+    );
 
   } catch (error) {
     console.error("Error executing transaction:", error);
