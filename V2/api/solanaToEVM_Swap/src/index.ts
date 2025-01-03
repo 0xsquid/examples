@@ -28,7 +28,7 @@ const getBridgeType = (toChain: string): string => {
 const getRoute = async (params: any) => {
   try {
     const result = await axios.post(
-      "https://api.uatsquidrouter.com/v2/route",
+      "https://apiplus.squidrouter.com/v2/route",
       params,
       {
         headers: {

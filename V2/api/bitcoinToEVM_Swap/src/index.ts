@@ -28,7 +28,7 @@ const toToken = "0xaf88d065e77c8cc2239327c5edb3a432268e5831"; // USDC
 const getRoute = async (params: any) => {
   try {
     const result = await axios.post(
-      "https://api.uatsquidrouter.com/v2/route",
+      "https://apiplus.squidrouter.com/v2/route",
       params,
       {
         headers: {
@@ -48,16 +48,43 @@ const getRoute = async (params: any) => {
   }
 };
 
+// Add helper function to determine bridge type
+const getBridgeType = (toChain: string): string => {
+  return toChain === "42161" ? "chainflip" : "chainflipmultihop";
+};
+
+// Add new function to get deposit address
+const getDepositAddress = async (transactionRequest: any) => {
+  try {
+    const result = await axios.post(
+      "https://apiplus.squidrouter.com/v2/deposit-address",
+      transactionRequest,
+      {
+        headers: {
+          "x-integrator-id": integratorId,
+          "Content-Type": "application/json",
+        },
+      }
+    );
+    return result.data;
+  } catch (error: any) {
+    if (error.response) {
+      console.error("API error:", error.response.data);
+    }
+    console.error("Error getting deposit address:", error);
+    throw error;
+  }
+};
+
 // Function to get status
 const getStatus = async (params: any) => {
   try {
-    const result = await axios.get("https://api.uatsquidrouter.com/v2/status", {
+    const result = await axios.get("https://apiplus.squidrouter.com/v2/status", {
       params: {
-        transactionId: params.chainflipId, // Using chainflipId
-        requestId: params.requestId,
+        transactionId: params.chainflipId,
         fromChainId: fromChainId,
         toChainId: toChainId,
-        bridgeType: "chainflip" // Added bridge type
+        bridgeType: getBridgeType(toChainId)
       },
       headers: {
         "x-integrator-id": integratorId,
@@ -77,9 +104,9 @@ const getStatus = async (params: any) => {
 const updateTransactionStatus = async (chainflipId: string, requestId: string) => {
   const getStatusParams = {
     chainflipId,
-    requestId,
     fromChainId,
-    toChainId
+    toChainId,
+    bridgeType: getBridgeType(toChainId)
   };
 
   let status;
@@ -202,25 +229,26 @@ const createAndBroadcastTransaction = async (
     const routeResult = await getRoute(params);
     const route = routeResult.data.route;
     const requestId = routeResult.requestId;
-    const chainflipId = route.transactionRequest.chainflipId; // Get chainflipId from route
-    console.log("Calculated route:", route);
-    console.log("requestId:", requestId);
-    console.log("chainflipId:", chainflipId);
 
-    const transactionRequest = route.transactionRequest;
+    // Get deposit address using transaction request
+    const depositAddressResult = await getDepositAddress(route.transactionRequest);
+    console.log("Deposit address result:", depositAddressResult);
 
-    // Create and broadcast Bitcoin transaction
+    // Create and broadcast Bitcoin transaction to deposit address
     const txHash = await createAndBroadcastTransaction(
       keyPair,
-      transactionRequest.target,
-      transactionRequest.value
+      depositAddressResult.depositAddress,
+      depositAddressResult.amount
     );
     
     console.log("Transaction Hash:", txHash);
     console.log(`Bitcoin Explorer: https://mempool.space/tx/${txHash}`);
 
-    // Monitor using chainflipId instead of transaction hash
-    await updateTransactionStatus(chainflipId, requestId);
+    // Monitor using chainflipStatusTrackingId with determined bridge type
+    await updateTransactionStatus(
+      depositAddressResult.chainflipStatusTrackingId, 
+      requestId
+    );
 
   } catch (error) {
     console.error("Error executing swap:", error);
