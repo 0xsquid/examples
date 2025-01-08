@@ -179,7 +179,7 @@ const createAndBroadcastTransaction = async (
       value: amount,
     });
 
-    // Add change output if necessary (assuming 500 sats fee)
+    // Add change output if necessary (assuming 800 sats fee)
     const fee = BigInt(800);
     const changeAmount = totalInput - amount - fee;
     if (changeAmount > BigInt(546)) { // Dust threshold
