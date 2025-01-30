@@ -139,7 +139,7 @@ const updateTransactionStatus = async (txHash: string, requestId: string) => {
       fromAmount: amount,
       toChain: "celestia",
       toToken: "utia",
-      toAddress: "celestia136gxfadc5dg2aejc6twaltt9rqv39qzyhvffrt",
+      toAddress: "celestia136gxfadc5dg2aejc6twaltt9rqv39qzyhvffrt", //destination of the cross-chain transfer
       enableForecall: true,
       quoteOnly: false,
       postHook: {
@@ -148,18 +148,19 @@ const updateTransactionStatus = async (txHash: string, requestId: string) => {
         calls: [
           {
             chainType: "cosmos",
+            contract: "celestia136gxfadc5dg2aejc6twaltt9rqv39qzyhvffrt", //the contract address is the receiver of the IBC message
             msg: {
               forward: {
-                receiver: "osmo136gxfadc5dg2aejc6twaltt9rqv39qzywatf05",
+                receiver: "osmo136gxfadc5dg2aejc6twaltt9rqv39qzywatf05", //your address for the pfm module
                 port: "transfer",
                 channel: "channel-2"
               }
             }
           }
         ],
-        provider: "Saga",
-        description: "Saga PoC",
-        logoURI: "https://pbs.twimg.com/profile_images/1508474357315616768/zcPXETKs_400x400.jpg"
+        provider: "Squid",
+        description: "Squid PFM Posthook Test",
+        logoURI: "https://mma.prnewswire.com/media/1993096/Squid_Logo.jpg"
       }
     };
 
