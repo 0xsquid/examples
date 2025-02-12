@@ -101,8 +101,6 @@ const getSDK = () => {
     fromAmount: amount,
     toChain: arbitrumId,
     toToken: magicToken,
-    slippage: 1,
-    // enableExpress: false, // default is true on all chains except Ethereum
     postHook: [
       description: "Buy Milady 2039 on Ethereum"
       {

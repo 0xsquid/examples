@@ -219,8 +219,7 @@ const createAndBroadcastTransaction = async (
       toChain: toChainId,
       toToken: toToken,
       toAddress: "0xC601C9100f8420417A94F6D63e5712C21029525e",
-      quoteOnly: false,
-      enableBoost: true
+      quoteOnly: false
     };
 
     console.log("Parameters:", params);
