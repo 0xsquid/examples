@@ -15,7 +15,7 @@ const fromToken = "0x55d398326f99059fF775485246999027B3197955"; // USDT
 const toToken = "0xaf88d065e77c8cC2239327C5EDb3A432268e5831"; // USDC
 
 // Define the amount to be sent
-const amount = "1000000000000000";
+const amount = "150000000000000000";
 
 // Set up JSON RPC provider and signer 
 const provider = new ethers.providers.JsonRpcProvider(FROM_CHAIN_RPC);
@@ -67,6 +67,21 @@ const getStatus = async (params: any) => {
     console.error("Error with parameters:", params);
     throw error;
   }
+};
+
+// Function to determine if the route contains an RFQ action
+
+const hasRfqAction = (route: any) => {
+
+  return route.estimate.actions.some((action: any) => action.type === "rfq");
+
+};
+
+// Function to get the appropriate explorer URL based on route type
+const getExplorerUrl = (txHash: string, route: any) => {
+  return hasRfqAction(route)
+    ? `https://coralscan.squidrouter.com/tx/${txHash}`
+    : `https://axelarscan.io/gmp/${txHash}`;
 };
 
 // Function to periodically check the transaction status until it completes
@@ -161,9 +176,10 @@ const approveSpending = async (transactionRequestTarget: string, fromToken: stri
   console.log("Transaction Hash:", tx.hash);
   const txReceipt = await tx.wait();
 
-  // Show the transaction receipt with Axelarscan link
-  const axelarScanLink = "https://axelarscan.io/gmp/" + txReceipt.transactionHash;
-  console.log(`Finished! Check Axelarscan for details: ${axelarScanLink}`);
+
+  // Get the appropriate explorer URL based on route type
+  const explorerUrl = getExplorerUrl(txReceipt.transactionHash, route);
+  console.log(`Finished! Check transaction details: ${explorerUrl}`);
 
   // Update transaction status until it completes
   await updateTransactionStatus(txReceipt.transactionHash, requestId);
