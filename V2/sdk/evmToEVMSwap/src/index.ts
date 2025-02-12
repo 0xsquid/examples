@@ -66,8 +66,7 @@ const approveSpending = async (transactionRequestTarget: string, fromToken: stri
     fromAmount: amount,
     toChain: toChainId,
     toToken: toToken,
-    toAddress: signer.address,
-    enableBoost: true,
+    toAddress: signer.address
   };
 
   console.log("Parameters:", params); // Printing the parameters for QA

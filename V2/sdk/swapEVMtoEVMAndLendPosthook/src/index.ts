@@ -105,7 +105,6 @@ const approveSpending = async (transactionRequestTarget: string, fromToken: stri
     toAddress: signer.address,
     slippage: 1, //optional, Squid will dynamically calculate if removed
     quoteOnly: false,
-    enableBoost: true,
     postHooks: {
       chainType: ChainType.EVM,
       calls: [
