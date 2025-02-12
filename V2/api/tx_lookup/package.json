@@ -1,0 +1,21 @@
+{
+    "name": "transaction-lookup",
+    "version": "1.0.0",
+    "description": "Script to lookup transactions across Axelar and Squid APIs",
+    "main": "tx-lookup.js",
+    "type": "module",
+    "scripts": {
+      "start": "node tx-lookup.js"
+    },
+    "keywords": [
+      "blockchain",
+      "transaction",
+      "axelar",
+      "squid"
+    ],
+    "author": "",
+    "license": "ISC",
+    "dependencies": {
+      "node-fetch": "^3.3.2"
+    }
+  }
