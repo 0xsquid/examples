@@ -310,7 +310,6 @@ async function getOpenseaFulfillmentData(tokenId: string, collectionAddress: str
       toChain: toChainId,
       toToken: toToken,
       toAddress: signer.address,
-      enableExpress: true,
       postHook: {
         chainType: "evm",
         calls: [
