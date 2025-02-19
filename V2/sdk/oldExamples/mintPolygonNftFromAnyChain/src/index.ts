@@ -68,7 +68,7 @@ const getSDK = (): Squid => {
     slippage: 1,
     quoteOnly: false,
     // Customize contract call for minting NFT on Polygon
-    postHooks: [
+    postHook: [
       {
         callType: 0, // SquidCallType.DEFAULT
         target: nftContractAddress,

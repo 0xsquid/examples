@@ -69,7 +69,7 @@ const getSDK = (): Squid => {
     slippage: 1,
     quoteOnly: false,
     // Customize contract call for depositing on Arbitrum
-    postHooks: [
+    postHook: [
       {
         callType: 1, // SquidCallType.FULL_TOKEN_BALANCE
         target: radiantLendingPoolAddress,
