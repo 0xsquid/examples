@@ -94,7 +94,7 @@ const delegateEncodedData = stakingContractInterface.encodeFunctionData(
     slippage: 1,
     quoteOnly: false,
     // Customize contract call for staking on Fantom
-    postHooks: [
+    postHook: [
       {
         callType: 1, // SquidCallType.FULL_TOKEN_BALANCE
         target: stakingContractAddress,
