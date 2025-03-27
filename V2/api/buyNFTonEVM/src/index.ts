@@ -54,7 +54,7 @@ const approveSpending = async (transactionRequestTarget: string, fromToken: stri
 const getRoute = async (params: any) => {
   try {
     const result = await axios.post(
-      "https://apiplus.squidrouter.com/v2/route",
+      "https://v2.api.squidrouter.com/v2/route",
       params,
       {
         headers: {
@@ -75,7 +75,7 @@ const getRoute = async (params: any) => {
 // Function to get transaction status from Squid API
 const getStatus = async (params: any) => {
   try {
-    const result = await axios.get("https://apiplus.squidrouter.com/v2/status", {
+    const result = await axios.get("https://v2.api.squidrouter.com/v2/status", {
       params: {
         transactionId: params.transactionId,
         requestId: params.requestId,
@@ -97,7 +97,7 @@ const getStatus = async (params: any) => {
 // Function to get token information from Squid API
 const getTokens = async () => {
   try {
-    const result = await axios.get('https://apiplus.squidrouter.com/v2/sdk-info', {
+    const result = await axios.get('https://v2.api.squidrouter.com/v2/sdk-info', {
       headers: {
         'x-integrator-id': integratorId,
       },

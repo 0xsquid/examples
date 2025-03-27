@@ -39,7 +39,7 @@ const aavePoolContract = new ethers.Contract(aavePoolAddress, aavePoolAbi, signe
 const getRoute = async (params: any) => {
   try {
     const result = await axios.post(
-      "https://apiplus.squidrouter.com/v2/route",
+      "https://v2.api.squidrouter.com/v2/route",
       params,
       {
         headers: {

@@ -44,7 +44,7 @@ const toTokenContract = new ethers.Contract(toToken, erc20Abi, signer);
 const getRoute = async (params: any) => {
   try {
     const result = await axios.post(
-      "https://apiplus.squidrouter.com/v2/route",
+      "https://v2.api.squidrouter.com/v2/route",
       params,
       {
         headers: {

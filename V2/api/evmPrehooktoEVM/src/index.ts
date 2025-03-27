@@ -32,7 +32,7 @@ const wethContract = new ethers.Contract(WETH_ADDRESS, wethAbi, signer);
 const getRoute = async (params: any) => {
   try {
     const result = await axios.post(
-      "https://apiplus.squidrouter.com/v2/route",
+      "https://v2.api.squidrouter.com/v2/route",
       params,
       {
         headers: {
@@ -55,7 +55,7 @@ const getRoute = async (params: any) => {
 // Function to get the status of the transaction using Squid API
 const getStatus = async (params: any) => {
   try {
-    const result = await axios.get("https://apiplus.squidrouter.com/v2/status", {
+    const result = await axios.get("https://v2.api.squidrouter.com/v2/status", {
       params: {
         transactionId: params.transactionId,
         requestId: params.requestId,
