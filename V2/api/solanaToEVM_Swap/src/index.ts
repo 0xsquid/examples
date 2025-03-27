@@ -28,7 +28,7 @@ const getBridgeType = (toChain: string): string => {
 const getRoute = async (params: any) => {
   try {
     const result = await axios.post(
-      "https://apiplus.squidrouter.com/v2/route",
+      "https://v2.api.squidrouter.com/v2/route",
       params,
       {
         headers: {
@@ -51,7 +51,7 @@ const getRoute = async (params: any) => {
 // Function to get status
 const getStatus = async (params: any) => {
   try {
-    const result = await axios.get("https://apiplus.squidrouter.com/v2/status", {
+    const result = await axios.get("https://v2.api.squidrouter.com/v2/status", {
       params: {
         transactionId: params.chainflipId,
         fromChainId: fromChainId,
@@ -115,7 +115,7 @@ const updateTransactionStatus = async (chainflipId: string, requestId: string) =
 const getDepositAddress = async (transactionRequest: any) => {
   try {
     const result = await axios.post(
-      "https://apiplus.squidrouter.com/v2/deposit-address",
+      "https://v2.api.squidrouter.com/v2/deposit-address",
       transactionRequest,
       {
         headers: {

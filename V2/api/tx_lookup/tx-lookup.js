@@ -10,7 +10,7 @@ const CONFIG = {
 
 // API endpoints
 const AXELAR_API = 'https://api.axelarscan.io/gmp/searchGMP'; //Axelarscan API documentation:https://docs.axelarscan.io/gmp#searchGMP
-const SQUID_API = 'https://apiplus.squidrouter.com/v2/rfq/order';
+const SQUID_API = 'https://v2.api.squidrouter.com/v2/rfq/order';
 
 async function lookupTransaction() {
     try {
