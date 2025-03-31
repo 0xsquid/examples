@@ -16,10 +16,10 @@ const toToken = "0xe9e7CEA3DedcA5984780Bafc599bD69ADd087D56"; // BUSD on Binance
 const WETH_ADDRESS = "0x82aF49447D8a07e3bd95BD0d56f35241523fBab1";
 
 // Define amount to be wrapped and bridged
-const amount = ethers.utils.parseEther("0.0001"); // Amount in ETH
+const amount = ethers.parseEther("0.0001"); // Amount in ETH
 
 // Set up JSON RPC provider and signer
-const provider = new ethers.providers.JsonRpcProvider(FROM_CHAIN_RPC);
+const provider = new ethers.JsonRpcProvider(FROM_CHAIN_RPC);
 const signer = new ethers.Wallet(privateKey, provider);
 
 // Import WETH ABI
@@ -28,7 +28,7 @@ import wethAbi from "../abi/wethAbi"; // Adjust the path if necessary
 // Function to get Squid SDK instance
 const getSDK = (): Squid => {
   const squid = new Squid({
-    baseUrl: "https://apiplus.squidrouter.com",
+    baseUrl: "https://v2.api.squidrouter.com",
     integratorId: integratorId,
   });
   return squid;
@@ -42,18 +42,18 @@ const getSDK = (): Squid => {
   console.log("Initialized Squid SDK");
 
   // Creating Contract interfaces
-  const wethInterface = new ethers.utils.Interface(wethAbi);
+  const wethInterface = new ethers.Interface(wethAbi);
   const wrapEncodedData = wethInterface.encodeFunctionData("deposit");
 
   // Set up parameters for wrapping ETH to wETH and bridging to BUSD on Binance Smart Chain
   const params = {
-    fromAddress: signer.address,
+    fromAddress: await signer.getAddress(),
     fromChain: fromChainId,
     fromToken: WETH_ADDRESS, // WETH on Arbitrum
     fromAmount: amount.toString(),
     toChain: toChainId,
     toToken: toToken,
-    toAddress: signer.address,
+    toAddress: await signer.getAddress(),
     slippage: 1, //optional, Squid will dynamically calculate if removed
     preHook: {
       chainType: ChainType.EVM,
@@ -86,15 +86,33 @@ const getSDK = (): Squid => {
   console.log("Calculated route:", route.estimate.toAmount);
 
   // Execute the wrap and bridge transaction
-  const tx = (await squid.executeRoute({
-    signer,
+  const txResponse = await squid.executeRoute({
+    signer: signer as any,
     route,
-  })) as unknown as ethers.providers.TransactionResponse;
-  const txReceipt = await tx.wait();
-  console.log("Transaction Hash: ", txReceipt.transactionHash);
+    bypassBalanceChecks: true // Add this to bypass balance checks since we're wrapping ETH for this example
+  });
+  
+  // Handle the transaction response 
+  let txHash: string = 'unknown';
+  
+  if (txResponse && typeof txResponse === 'object') {
+    if ('hash' in txResponse) {
+      txHash = txResponse.hash as string;
+      const txReceipt = await (txResponse as any).wait?.(); // Wait for the transaction 
+      console.log("Transaction Hash: ", txHash);
+    } else if ('transactionHash' in txResponse) {
+      // This might be a v5 style response or custom Squid format
+      txHash = (txResponse as any).transactionHash as string;
+      console.log("Transaction Hash: ", txHash);
+    } else {
+      // Fallback - try to find a hash property
+      txHash = (txResponse as any).hash as string || 'unknown';
+      console.log("Transaction Hash: ", txHash);
+    }
+  }
 
   // Show the transaction receipt with Axelarscan link
-  const axelarScanLink = "https://axelarscan.io/gmp/" + txReceipt.transactionHash;
+  const axelarScanLink = "https://axelarscan.io/gmp/" + txHash;
   console.log(`Finished! Check Axelarscan for details: ${axelarScanLink}`);
 
   // Wait a few seconds before checking the status
@@ -102,7 +120,7 @@ const getSDK = (): Squid => {
 
   // Parameters for checking the status of the transaction
   const getStatusParams = {
-    transactionId: txReceipt.transactionHash,
+    transactionId: txHash,
     requestId: requestId,
     integratorId: integratorId,
     fromChainId: fromChainId,
@@ -112,11 +130,12 @@ const getSDK = (): Squid => {
   const completedStatuses = ["success", "partial_success", "needs_gas", "not_found"];
   const maxRetries = 10; // Maximum number of retries for status check
   let retryCount = 0;
+  
+  // Get the initial status
   let status = await squid.getStatus(getStatusParams);
-
-  // Loop to check the transaction status until it is completed or max retries are reached
   console.log(`Initial route status: ${status.squidTransactionStatus}`);
 
+  // Loop to check the transaction status until it is completed or max retries are reached
   do {
     try {
       // Wait a few seconds before checking the status
@@ -146,5 +165,5 @@ const getSDK = (): Squid => {
   } while (status && !completedStatuses.includes(status.squidTransactionStatus));
 
   // Wait for the transaction to be mined
-  console.log("Transaction executed:", txReceipt.transactionHash);
+  console.log("Transaction executed:", txHash);
 })();

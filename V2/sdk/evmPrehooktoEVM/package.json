@@ -7,6 +7,6 @@
 		"@0xsquid/squid-types": "^0.1.27",
 		"@openzeppelin/contracts": "^4.9.3",
 		"dotenv": "^16.3.1",
-		"ethers": "^5.7.2"
+		"ethers": "^6.8.1"
 	}
 }
