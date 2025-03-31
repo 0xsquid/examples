@@ -1,4 +1,3 @@
-=======
 // Import necessary libraries
 import { ethers } from "ethers";
 import { Squid } from "@0xsquid/sdk";
@@ -12,8 +11,8 @@ dotenv.config();
 const privateKey: string = process.env.PRIVATE_KEY!;
 const integratorId: string = process.env.INTEGRATOR_ID!;
 const FROM_CHAIN_RPC: string = process.env.RPC_ENDPOINT!;
-const radiantLendingPoolAddress: string = process.env.RADIANT_LENDING_POOL_ADDRESS!;
-const usdcArbitrumAddress: string = process.env.USDC_ARBITRUM_ADDRESS!;
+const aaveArbitrumPoolAddress: string = "0x794a61358D6845594F94dc1DB02A252b5b4814aD"; // Aave v3 pool on Arbitrum
+const usdcArbitrumAddress: string = "0xaf88d065e77c8cC2239327C5EDb3A432268e5831";
 
 // Define chain and token addresses
 const fromChainId = "56"; // Binance
@@ -27,16 +26,18 @@ const amount = "100000000000000000";
 const provider = new ethers.JsonRpcProvider(FROM_CHAIN_RPC);
 const signer = new ethers.Wallet(privateKey, provider);
 
-// Import Radiant lending pool ABI
-import radiantLendingPoolAbi from "../abi/radiantLendingPoolAbi";
-
 // Import erc20 contract ABI
 import erc20Abi from "../abi/erc20Abi";
+
+// Define Aave pool ABI (simplified for this example)
+const aavePoolAbi = [
+  "function supply(address asset, uint256 amount, address onBehalfOf, uint16 referralCode) external"
+];
 
 // Function to get Squid SDK instance
 const getSDK = (): Squid => {
   const squid = new Squid({
-    baseUrl: "https://apiplus.squidrouter.com",
+    baseUrl: "https://v2.api.squidrouter.com",
     integratorId: integratorId,
   });
   return squid;
@@ -67,33 +68,31 @@ const approveSpending = async (transactionRequestTarget: string, fromToken: stri
   console.log("Initialized Squid SDK");
 
   // Creating Contract interfaces
-  // Approve the lending contract to spend the erc20
+  // Approve the Aave pool contract to spend the USDC
   const erc20Interface = new ethers.Interface(erc20Abi);
-  const approvalerc20 = erc20Interface.encodeFunctionData("approve", [
-    radiantLendingPoolAddress,
+  const approvalData = erc20Interface.encodeFunctionData("approve", [
+    aaveArbitrumPoolAddress,
     ethers.MaxUint256, // ethers v6 uses MaxUint256 directly on ethers
   ]);
 
-  // Create contract interface and encode deposit function for Radiant lending pool
-  const radiantLendingPoolInterface = new ethers.Interface(
-    radiantLendingPoolAbi
-  );
+  // Create contract interface and encode supply function for Aave lending pool
+  const aavePoolInterface = new ethers.Interface(aavePoolAbi);
   
   const userAddress = await signer.getAddress();
   
-  const depositEncodedData = radiantLendingPoolInterface.encodeFunctionData(
-    "deposit",
+  const supplyData = aavePoolInterface.encodeFunctionData(
+    "supply",
     [
       usdcArbitrumAddress,
-      "0", // Placeholder for dynamic balance
+      "0", // Amount will be replaced with the full token balance
       userAddress,
-      0,
+      0, // referralCode
     ]
   );
 
   
   
-  // Set up parameters for swapping tokens and depositing into Radiant lending pool
+  // Set up parameters for swapping tokens and depositing into Aave lending pool
   const params = {
     fromAddress: userAddress,
     fromChain: fromChainId,
@@ -108,10 +107,10 @@ const approveSpending = async (transactionRequestTarget: string, fromToken: stri
       calls: [
         {
           chainType: ChainType.EVM, 
-          callType: 1,// SquidCallType.FULL_TOKEN_BALANCE
+          callType: 1, // SquidCallType.FULL_TOKEN_BALANCE
           target: usdcArbitrumAddress,
           value: "0", // this will be replaced by the full native balance of the multicall after the swap
-          callData: approvalerc20,
+          callData: approvalData,
           payload: {
             tokenAddress: usdcArbitrumAddress,
             inputPos: 1,
@@ -121,19 +120,19 @@ const approveSpending = async (transactionRequestTarget: string, fromToken: stri
         {
           chainType: ChainType.EVM,
           callType: 1, // SquidCallType.FULL_TOKEN_BALANCE
-          target: radiantLendingPoolAddress,
+          target: aaveArbitrumPoolAddress,
           value: "0",
-          callData: depositEncodedData,
+          callData: supplyData,
           payload: {
             tokenAddress: usdcArbitrumAddress,
             inputPos: 1,
           },
-          estimatedGas: "50000",
+          estimatedGas: "200000",
         } as EvmContractCall,
       ],
-      provider: "Squid", //This should be the name of your product or application that is triggering the hook
-      description: "Radiant Lend",
-      logoURI: "https://pbs.twimg.com/profile_images/1548647667135291394/W2WOtKUq_400x400.jpg", //This should be your product or applications logo
+      provider: "Aave",
+      description: "Deposit to Aave on Arbitrum",
+      logoURI: "https://app.aave.com/favicon.ico",
     },
   };
   
