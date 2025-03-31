@@ -34,7 +34,7 @@ In this repository we have examples for the following transaction routes:
 - EVM postHooks
 - Cosmos PostHooks
 
-Note, v1 has been deprecated and no longer publicly available.
+Note, v1 has been deprecated and is no longer publicly available.
 
 
 ## Where to find us

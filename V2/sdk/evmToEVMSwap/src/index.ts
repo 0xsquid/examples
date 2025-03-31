@@ -1,5 +1,5 @@
 import { Squid } from "@0xsquid/sdk"; // Import Squid SDK
-import { ethers } from "ethers"; // Import ethers library
+import { ethers } from "ethers"; // Import ethers v6
 import * as dotenv from "dotenv"; // Import dotenv for environment variables
 dotenv.config(); // Load environment variables from .env file
 
@@ -23,13 +23,15 @@ const toToken = "0xaf88d065e77c8cC2239327C5EDb3A432268e5831"; // USDC token addr
 const amount = "1000000000000000"; 
 
 // Set up JSON RPC provider and signer using the private key and RPC URL
-const provider = new ethers.providers.JsonRpcProvider(FROM_CHAIN_RPC);
+// Create provider with the full URL
+const provider = new ethers.JsonRpcProvider(FROM_CHAIN_RPC);
+// Create wallet with the private key
 const signer = new ethers.Wallet(privateKey, provider);
 
 // Initialize the Squid client with the base URL and integrator ID
 const getSDK = (): Squid => {
   const squid = new Squid({
-    baseUrl: "https://apiplus.squidrouter.com",
+    baseUrl: "https://v2.api.squidrouter.com",
     integratorId: integratorId,
   });
   return squid;
@@ -60,13 +62,13 @@ const approveSpending = async (transactionRequestTarget: string, fromToken: stri
 
   // Set up parameters for swapping tokens
   const params = {
-    fromAddress: signer.address,
+    fromAddress: await signer.getAddress(),
     fromChain: fromChainId,
     fromToken: fromToken,
     fromAmount: amount,
     toChain: toChainId,
     toToken: toToken,
-    toAddress: signer.address
+    toAddress: await signer.getAddress()
   };
 
   console.log("Parameters:", params); // Printing the parameters for QA
@@ -75,20 +77,50 @@ const approveSpending = async (transactionRequestTarget: string, fromToken: stri
   const { route, requestId } = await squid.getRoute(params);
   console.log("Calculated route:", route.estimate.toAmount);
 
-  const transactionRequest = route.transactionRequest;
+  // Get the transaction request from route
+  if (!route.transactionRequest) {
+    console.error("No transaction request in route");
+    process.exit(1);
+  }
 
-  // Approve the transactionRequest.target to spend fromAmount of fromToken
-  await approveSpending(transactionRequest.target, fromToken, amount);
+  // For SquidData objects, we need to check what type it is and extract the target
+  let target: string;
+  if ('target' in route.transactionRequest) {
+    target = route.transactionRequest.target;
+  } else {
+    console.error("Cannot determine target address from transaction request");
+    console.log("Transaction request:", route.transactionRequest);
+    process.exit(1);
+  }
+
+  // Approve the target to spend fromAmount of fromToken
+  await approveSpending(target, fromToken, amount);
 
   // Execute the swap transaction
-  const tx = (await squid.executeRoute({
-    signer,
+  const txResponse = await squid.executeRoute({
+    signer: signer as any, // Cast to any to bypass type checking issues
     route,
-  })) as unknown as ethers.providers.TransactionResponse;
-  const txReceipt = await tx.wait();
+  });
+
+  // Handle the transaction response - could be an ethers v6 TransactionResponse or something else
+  let txHash: string = 'unknown';
+  
+  if (txResponse && typeof txResponse === 'object') {
+    if ('hash' in txResponse) {
+      // This is an ethers TransactionResponse
+      txHash = txResponse.hash as string;
+      await (txResponse as any).wait?.(); // Wait for the transaction to be mined if possible
+    } else if ('transactionHash' in txResponse) {
+      // This might be a v5 style response or custom Squid format
+      txHash = (txResponse as any).transactionHash as string;
+    } else {
+      // Fallback - try to find a hash property
+      txHash = (txResponse as any).hash as string || 'unknown';
+    }
+  }
 
   // Show the transaction receipt with Axelarscan link
-  const axelarScanLink = "https://axelarscan.io/gmp/" + txReceipt.transactionHash;
+  const axelarScanLink = "https://axelarscan.io/gmp/" + txHash;
   console.log(`Finished! Check Axelarscan for details: ${axelarScanLink}`);
 
   // Wait a few seconds before checking the status
@@ -96,7 +128,7 @@ const approveSpending = async (transactionRequestTarget: string, fromToken: stri
 
   // Parameters for checking the status of the transaction
   const getStatusParams = {
-    transactionId: txReceipt.transactionHash,
+    transactionId: txHash,
     requestId: requestId,
     integratorId: integratorId,
     fromChainId: fromChainId,
@@ -106,11 +138,12 @@ const approveSpending = async (transactionRequestTarget: string, fromToken: stri
   const completedStatuses = ["success", "partial_success", "needs_gas", "not_found"];
   const maxRetries = 10; // Maximum number of retries for status check
   let retryCount = 0;
+  
+  // Get the initial status
   let status = await squid.getStatus(getStatusParams);
-
-  // Loop to check the transaction status until it is completed or max retries are reached
   console.log(`Initial route status: ${status.squidTransactionStatus}`);
 
+  // Loop to check the transaction status until it is completed or max retries are reached
   do {
     try {
       // Wait a few seconds before checking the status
@@ -139,6 +172,6 @@ const approveSpending = async (transactionRequestTarget: string, fromToken: stri
 
   } while (status && !completedStatuses.includes(status.squidTransactionStatus));
 
-  // Wait for the transaction to be mined
-  console.log("Swap transaction executed:", txReceipt.transactionHash);
+  // Wait for the transaction to be executed
+  console.log("Swap transaction executed:", txHash);
 })();
