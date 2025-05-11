@@ -74,7 +74,7 @@ const getSDK = () => {
     quantity: 1,
     maxPricePerItem: "990000000000000000",
     paymentToken: magicToken,
-    usinEth: false,
+    usingEth: false,
   };
   const buyMoonRockNftEncodeData =
     treasureMarketplaceInterface.encodeFunctionData("buyItems", [
