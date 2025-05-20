@@ -1,3 +1,4 @@
+//EVM to EVM Swap Using Squid API
 import { ethers } from "ethers";
 import axios from "axios";
 import * as dotenv from "dotenv";
@@ -170,7 +171,7 @@ const approveSpending = async (transactionRequestTarget: string, fromToken: stri
     to: transactionRequest.target,
     data: transactionRequest.data,
     value: transactionRequest.value,
-    gasPrice: await provider.getGasPrice(),
+    gasPrice: transactionRequest.gasPrice,
     gasLimit: transactionRequest.gasLimit,
   });
   console.log("Transaction Hash:", tx.hash);
