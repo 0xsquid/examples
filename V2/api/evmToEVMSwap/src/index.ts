@@ -10,16 +10,16 @@ const integratorId: string = process.env.INTEGRATOR_ID!;
 const FROM_CHAIN_RPC: string = process.env.FROM_CHAIN_RPC_ENDPOINT!;
 
 // Define chain and token addresses
-const fromChainId = "56"; // BNB
-const toChainId = "42161"; // Arbitrum
-const fromToken = "0x55d398326f99059fF775485246999027B3197955"; // USDT
-const toToken = "0xaf88d065e77c8cC2239327C5EDb3A432268e5831"; // USDC
+const fromChainId = "1"; // BNB
+const toChainId = "56"; // Arbitrum
+const fromToken = "0xdac17f958d2ee523a2206206994597c13d831ec7"; // USDT
+const toToken = "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee"; // USDC
 
 // Define the amount to be sent
-const amount = "150000000000000000";
+const amount = "1000000";
 
 // Set up JSON RPC provider and signer 
-const provider = new ethers.providers.JsonRpcProvider(FROM_CHAIN_RPC);
+const provider = new ethers.JsonRpcProvider(FROM_CHAIN_RPC);
 const signer = new ethers.Wallet(privateKey, provider);
 
 // Function to get the optimal route for the swap using Squid API
@@ -179,9 +179,9 @@ const approveSpending = async (transactionRequestTarget: string, fromToken: stri
 
 
   // Get the appropriate explorer URL based on route type
-  const explorerUrl = getExplorerUrl(txReceipt.transactionHash, route);
+  const explorerUrl = getExplorerUrl(txReceipt.hash, route);
   console.log(`Finished! Check transaction details: ${explorerUrl}`);
 
   // Update transaction status until it completes
-  await updateTransactionStatus(txReceipt.transactionHash, requestId);
+  await updateTransactionStatus(txReceipt.hash, requestId);
 })();
