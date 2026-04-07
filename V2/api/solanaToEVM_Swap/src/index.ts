@@ -56,6 +56,7 @@ const getStatus = async (params: any) => {
         transactionId: params.chainflipId,
         fromChainId: fromChainId,
         toChainId: toChainId,
+    quoteId: quoteId || requestId, // Required for Coral V2 transactions
         bridgeType: getBridgeType(toChainId)
       },
       headers: {
@@ -73,7 +74,7 @@ const getStatus = async (params: any) => {
 };
 
 // Function to check transaction status
-const updateTransactionStatus = async (chainflipId: string, requestId: string) => {
+const updateTransactionStatus = async (chainflipId: string, requestId: string, quoteId?: string) => {
   const getStatusParams = {
     chainflipId,
     fromChainId,
@@ -151,6 +152,7 @@ const getDepositAddress = async (transactionRequest: any) => {
 
   const routeResult = await getRoute(params);
   const route = routeResult.data.route;
+  const quoteId = routeResult.data?.route?.estimate?.quoteId || routeResult.data?.route?.quoteId || routeResult.data?.quoteId;
   const requestId = routeResult.requestId;
   
   // Get deposit address using transaction request
@@ -177,9 +179,8 @@ const getDepositAddress = async (transactionRequest: any) => {
 
     // Monitor using chainflipStatusTrackingId with determined bridge type
     await updateTransactionStatus(
-      depositAddressResult.chainflipStatusTrackingId, 
-      requestId
-    );
+      depositAddressResult.chainflipStatusTrackingId, requestId
+    , quoteId);
 
   } catch (error) {
     console.error("Error executing transaction:", error);

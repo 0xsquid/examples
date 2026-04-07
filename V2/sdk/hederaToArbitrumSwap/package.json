@@ -1,0 +1,16 @@
+{
+	"scripts": {
+		"start": "npx ts-node src/index.ts"
+	},
+	"dependencies": {
+		"@0xsquid/sdk": "^2.9.3",
+		"@0xsquid/squid-types": "^0.1.145",
+		"@openzeppelin/contracts": "^4.9.3",
+		"ts-node": "^10.9.2",
+		"typescript": "^5.3.3",
+		"axios": "^1.6.7",
+		"dotenv": "^16.4.5",
+		"ethers": "^6.8.1"
+	},
+	"license": "MIT"
+}

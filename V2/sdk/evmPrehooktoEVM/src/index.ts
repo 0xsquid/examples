@@ -84,6 +84,7 @@ const getSDK = (): Squid => {
 
   // Get the swap route using Squid SDK
   const { route, requestId } = await squid.getRoute(params);
+  const quoteId = (route as any).estimate?.quoteId || (route as any).quoteId;
   console.log("Calculated route:", route.estimate.toAmount);
 
   // Execute the wrap and bridge transaction
@@ -126,6 +127,7 @@ const getSDK = (): Squid => {
     integratorId: integratorId,
     fromChainId: fromChainId,
     toChainId: toChainId,
+    quoteId: quoteId || requestId, // Required for Coral V2 transactions
   };
 
   const completedStatuses = ["success", "partial_success", "needs_gas", "not_found"];

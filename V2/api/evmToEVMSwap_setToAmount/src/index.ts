@@ -104,6 +104,7 @@ const getStatus = async (params: any) => {
         requestId: params.requestId,
         fromChainId: params.fromChainId,
         toChainId: params.toChainId,
+        quoteId: params.quoteId || params.requestId, // Required for Coral V2 transactions
       },
       headers: {
         "x-integrator-id": integratorId,
@@ -120,12 +121,13 @@ const getStatus = async (params: any) => {
 };
 
 // Function to periodically check the transaction status until it completes
-const updateTransactionStatus = async (txHash: string, requestId: string) => {
+const updateTransactionStatus = async (txHash: string, requestId: string, quoteId?: string) => {
   const getStatusParams = {
     transactionId: txHash,
     requestId: requestId,
     fromChainId: fromChainId,
     toChainId: toChainId,
+    quoteId: quoteId || requestId, // Required for Coral V2 transactions
   };
 
   let status;
@@ -217,6 +219,7 @@ const approveSpending = async (transactionRequestTarget: string, fromToken: stri
     // Get the swap route using Squid API
     const routeResult = await getRoute(params);
     const route = routeResult.data.route;
+  const quoteId = routeResult.data?.route?.estimate?.quoteId || routeResult.data?.route?.quoteId || routeResult.data?.quoteId;
     const requestId = routeResult.requestId;
     console.log("Calculated route:", route);
     console.log("requestId:", requestId);
@@ -242,7 +245,7 @@ const approveSpending = async (transactionRequestTarget: string, fromToken: stri
     console.log(`Finished! Check Axelarscan for details: ${axelarScanLink}`);
 
     // Update transaction status until it completes
-    await updateTransactionStatus(txReceipt.transactionHash, requestId);
+    await updateTransactionStatus(txReceipt.transactionHash, requestId, quoteId);
   } catch (error) {
     console.error("An error occurred:", error);
     if (error instanceof Error) {

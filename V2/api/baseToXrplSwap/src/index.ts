@@ -10,13 +10,13 @@ const integratorId: string = process.env.INTEGRATOR_ID!;
 const FROM_CHAIN_RPC: string = process.env.FROM_CHAIN_RPC_ENDPOINT!;
 
 // Define chain and token addresses
-const fromChainId = "1"; // BNB
-const toChainId = "56"; // Arbitrum
-const fromToken = "0xdac17f958d2ee523a2206206994597c13d831ec7"; // USDT
-const toToken = "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee"; // USDC
+const fromChainId = "8453"; // Base
+const toChainId = "xrpl-mainnet"; // XRPL
+const fromToken = "0x833589fcd6edb6e08f4c7c32d4f71b54bda02913"; // USDC
+const toToken = "524C555344000000000000000000000000000000.rMxCKbEDwqr76QuheSUMdEGf4B9xJ8m5De"; // RLUSD
 
 // Define the amount to be sent
-const amount = "1000000";
+const amount = ".100000"; // 1 USDC
 
 // Set up JSON RPC provider and signer 
 const provider = new ethers.JsonRpcProvider(FROM_CHAIN_RPC);
@@ -81,9 +81,7 @@ const hasRfqAction = (route: any) => {
 
 // Function to get the appropriate explorer URL based on route type
 const getExplorerUrl = (txHash: string, route: any) => {
-  return hasRfqAction(route)
-    ? `https://coralscan.squidrouter.com/tx/${txHash}`
-    : `https://axelarscan.io/gmp/${txHash}`;
+  return "https://scan.squidrouter.com/tx/" + txHash; // Standardized to Coralscan
 };
 
 // Function to periodically check the transaction status until it completes
@@ -151,7 +149,8 @@ const approveSpending = async (transactionRequestTarget: string, fromToken: stri
     fromAmount: amount,
     toChain: toChainId,
     toToken: toToken,
-    toAddress: signer.address,
+    toAddress: "rHhyFkaCtJwKbu52DXdVnxQAkTgEvVmEXS", // Exact XRPL destination
+    quoteOnly: false
   };
 
   console.log("Parameters:", params);
@@ -159,7 +158,7 @@ const approveSpending = async (transactionRequestTarget: string, fromToken: stri
   // Get the swap route using Squid API
   const routeResult = await getRoute(params);
   const route = routeResult.data.route;
-  const quoteId = routeResult.data?.route?.estimate?.quoteId || routeResult.data?.route?.quoteId || routeResult.data?.quoteId;
+  const quoteId = routeResult.data?.route?.estimate?.actions?.[0]?.coralV2Order?.quoteId || routeResult.data?.route?.estimate?.quoteId || routeResult.data?.route?.quoteId || routeResult.data?.quoteId;
   const requestId = routeResult.requestId;
   console.log("Calculated route:", route);
   console.log("requestId:", requestId);
