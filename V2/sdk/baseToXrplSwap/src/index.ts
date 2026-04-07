@@ -14,13 +14,13 @@ if (!privateKey || !integratorId || !FROM_CHAIN_RPC) {
 }
 
 // Define chain and token addresses
-const fromChainId = "56"; // BNB chain ID
-const toChainId = "42161"; // Arbitrum chain ID
-const fromToken = "0x55d398326f99059fF775485246999027B3197955"; // USDT token address on BNB
-const toToken = "0xaf88d065e77c8cC2239327C5EDb3A432268e5831"; // USDC token address on Arbitrum
+const fromChainId = "8453"; // Base chain ID
+const toChainId = "xrpl-mainnet"; // XRPL
+const fromToken = "0x833589fcd6edb6e08f4c7c32d4f71b54bda02913"; // USDC on Base
+const toToken = "524C555344000000000000000000000000000000.rMxCKbEDwqr76QuheSUMdEGf4B9xJ8m5De"; // RLUSD on XRPL
 
-// Define the amount to be sent (in smallest unit, e.g., wei for Ethereum)
-const amount = "1000000000000000"; 
+// Define the amount to be sent (in smallest unit, e.g., 6 decimals for USDC)
+const amount = "100000"; // .1 USDC 
 
 // Set up JSON RPC provider and signer using the private key and RPC URL
 // Create provider with the full URL
@@ -68,14 +68,18 @@ const approveSpending = async (transactionRequestTarget: string, fromToken: stri
     fromAmount: amount,
     toChain: toChainId,
     toToken: toToken,
-    toAddress: await signer.getAddress()
+    toAddress: "rHhyFkaCtJwKbu52DXdVnxQAkTgEvVmEXS", // Exact XRPL destination
+    quoteOnly: false
   };
 
   console.log("Parameters:", params); // Printing the parameters for QA
 
   // Get the swap route using Squid SDK
   const { route, requestId } = await squid.getRoute(params);
-  const quoteId = (route as any).estimate?.quoteId || (route as any).quoteId;
+  // Extract quoteId for Coral V2 transactions
+  const quoteId = (route as any).estimate?.actions?.[0]?.coralV2Order?.quoteId
+    || (route as any).estimate?.quoteId
+    || (route as any).quoteId;
   console.log("Calculated route:", route.estimate.toAmount);
 
   // Get the transaction request from route
@@ -105,7 +109,7 @@ const approveSpending = async (transactionRequestTarget: string, fromToken: stri
 
   // Handle the transaction response - could be an ethers v6 TransactionResponse or something else
   let txHash: string = 'unknown';
-  
+
   if (txResponse && typeof txResponse === 'object') {
     if ('hash' in txResponse) {
       // This is an ethers TransactionResponse
@@ -120,9 +124,9 @@ const approveSpending = async (transactionRequestTarget: string, fromToken: stri
     }
   }
 
-  // Show the transaction receipt with Axelarscan link
-  const axelarScanLink = "https://axelarscan.io/gmp/" + txHash;
-  console.log(`Finished! Check Axelarscan for details: ${axelarScanLink}`);
+  // Use Coralscan for cross-chain intent tracing
+  const axelarScanLink = "https://scan.squidrouter.com/tx/" + txHash;
+  console.log(`Finished! Check Coralscan for details: ${axelarScanLink}`);
 
   // Wait a few seconds before checking the status
   await new Promise((resolve) => setTimeout(resolve, 5000));
@@ -140,7 +144,7 @@ const approveSpending = async (transactionRequestTarget: string, fromToken: stri
   const completedStatuses = ["success", "partial_success", "needs_gas", "not_found"];
   const maxRetries = 10; // Maximum number of retries for status check
   let retryCount = 0;
-  
+
   // Get the initial status
   let status = await squid.getStatus(getStatusParams);
   console.log(`Initial route status: ${status.squidTransactionStatus}`);

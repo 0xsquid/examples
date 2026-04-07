@@ -141,6 +141,7 @@ const approveSpending = async (transactionRequestTarget: string, fromToken: stri
 
   // Get the swap route using Squid SDK
   const { route, requestId } = await squid.getRoute(params);
+  const quoteId = (route as any).estimate?.quoteId || (route as any).quoteId;
   console.log("Calculated route:", route.estimate.toAmount);
 
   // Get the transaction request from route
@@ -199,6 +200,7 @@ const approveSpending = async (transactionRequestTarget: string, fromToken: stri
     integratorId: integratorId,
     fromChainId: fromChainId,
     toChainId: toChainId,
+    quoteId: quoteId || requestId, // Required for Coral V2 transactions
   };
 
   const completedStatuses = ["success", "partial_success", "needs_gas", "not_found"];
