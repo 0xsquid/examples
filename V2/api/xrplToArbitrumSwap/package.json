@@ -7,7 +7,8 @@
 		"dotenv": "^16.4.5",
 		"ts-node": "^10.9.2",
 		"typescript": "^5.3.3",
-		"xrpl": "^3.0.0"
+		"xrpl": "^3.0.0",
+		"xrpl-secret-numbers": "^0.3.5"
 	},
 	"license": "MIT"
 }
