@@ -1,6 +1,7 @@
 import { Squid } from "@0xsquid/sdk";
 import * as dotenv from "dotenv";
 import * as xrpl from "xrpl"; // Import native XRPL SDK
+import { Account } from "xrpl-secret-numbers"; // Import Xaman secret number converter
 dotenv.config();
 
 // Retrieve environment variables
@@ -14,15 +15,27 @@ if (!xrplSeed || !integratorId) {
 
 // Define parameters from the provided payload
 const fromChainId = "xrpl-mainnet";
-const fromToken = "524C555344000000000000000000000000000000.rMxCKbEDwqr76QuheSUMdEGf4B9xJ8m5De"; // RLUSD
-const fromAmount = "1000000000000000"; // 1.0 RLUSD
+const fromToken = "xrp"; // Native XRP
+const fromAmount = "10000";
 
 const toChainId = "42161"; // Arbitrum
 const toToken = "0xaf88d065e77c8cc2239327c5edb3a432268e5831"; // USDC on Arbitrum
 
 // Set up XRPL public client and wallet
 const XRPL_RPC = "wss://s1.ripple.com/"; 
-const wallet = xrpl.Wallet.fromSeed(xrplSeed);
+
+// Detect if the seed is a Xaman secret number (contains spaces) or a standard base58 seed
+let wallet: xrpl.Wallet;
+if (xrplSeed.includes(" ")) {
+  // Convert Xaman secret numbers (8 groups of 6 digits) to a family seed
+  const account = new Account(xrplSeed);
+  const keypair = account.getKeypair();
+  console.log("Derived XRPL address from secret numbers:", account.getAddress());
+  // Build wallet from the keypair to ensure address consistency
+  wallet = new xrpl.Wallet(keypair.publicKey, keypair.privateKey);
+} else {
+  wallet = xrpl.Wallet.fromSeed(xrplSeed);
+}
 
 // Initialize the Squid client with the base URL and integrator ID
 const getSDK = (): Squid => {
@@ -101,8 +114,8 @@ const getSDK = (): Squid => {
   const txHash = txResult.result.hash;
   console.log("Transaction Mined in XRPL ledger! Hash:", txHash);
 
-  const xrplBithompLink = "https://bithomp.com/explorer/" + txHash;
-  console.log(`Check transaction details natively: ${xrplBithompLink}`);
+  const squidScanLink = "https://scan.squidrouter.com/tx/" + txHash;
+  console.log(`Check Coralscan for details: ${squidScanLink}`);
 
   // Parameters for checking the status of the transaction via Squid SDK
   const getStatusParams: any = {
