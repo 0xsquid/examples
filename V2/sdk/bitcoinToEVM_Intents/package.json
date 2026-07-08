@@ -1,0 +1,27 @@
+{
+	"scripts": {
+		"start": "ts-node src/index.ts"
+	},
+	"dependencies": {
+		"@0xsquid/sdk": "^2.9.3",
+		"@0xsquid/squid-types": "^0.1.145",
+		"axios": "^1.7.7",
+		"bitcoinjs-lib": "^7.0.0-rc.0",
+		"dotenv": "^16.4.5",
+		"ecpair": "^3.0.0-rc.0",
+		"ethers": "^6.8.1",
+		"tiny-secp256k1": "^2.2.3"
+	},
+	"devDependencies": {
+		"@types/node": "^20.11.24",
+		"ts-node": "^10.9.2",
+		"typescript": "^5.3.3"
+	},
+	"overrides": {
+		"uuid": "^9.0.0",
+		"rpc-websockets": {
+			"uuid": "^9.0.0"
+		}
+	},
+	"license": "MIT"
+}
