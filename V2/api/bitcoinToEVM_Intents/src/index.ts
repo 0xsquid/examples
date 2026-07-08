@@ -12,7 +12,7 @@ const ECPair = ECPairFactory(ecc);
 
 // Load environment variables
 const btcPrivateKey: string = process.env.BITCOIN_PRIVATE_KEY!;
-const integratorId: string = process.env.INTEGRATOR_ID || 'inkblot-api';
+const integratorId: string = process.env.INTEGRATOR_ID || 'your-integrator-id';
 const BITCOIN_NETWORK = bitcoin.networks.bitcoin;
 
 if (!btcPrivateKey) {
