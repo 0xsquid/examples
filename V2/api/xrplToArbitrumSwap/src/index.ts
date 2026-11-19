@@ -2,6 +2,8 @@ import axios from "axios";
 import * as dotenv from "dotenv";
 import * as xrpl from "xrpl"; // Import xrpl library for native XRPL logic
 import { Account } from "xrpl-secret-numbers"; // Import Xaman secret number converter
+import { pollRouteStatus } from "./pollRouteStatus";
+
 dotenv.config();
 
 // Load environment variables from .env file
@@ -65,63 +67,19 @@ const getRoute = async (params: any) => {
 };
 
 // Function to get the status of the transaction using Squid API
-const getStatus = async (params: any) => {
-  try {
-    const result = await axios.get("https://v2.api.squidrouter.com/v2/status", {
-      params,
-      headers: {
-        "x-integrator-id": integratorId,
-      },
-    });
-    return result.data;
-  } catch (error: any) {
-    if (error.response) {
-       console.error("API Error when checking status:", error.response.data);
-    }
-    throw error;
-  }
-};
-
-// Function to periodically check the transaction status until it completes
-const updateTransactionStatus = async (txHash: string, requestId: string, quoteId?: string) => {
-  const getStatusParams: any = {
-    transactionId: txHash,
-    requestId: requestId,
-    fromChainId: fromChainId,
-    toChainId: toChainId,
-    quoteId: quoteId || requestId, // Required for Coral V2 transactions
-  };
-
-  let status;
-  const completedStatuses = ["success", "partial_success", "needs_gas", "not_found"];
-  const maxRetries = 20;
-  let retryCount = 0;
-
-  do {
-    try {
-      status = await getStatus(getStatusParams);
-      console.log(`Route status: ${status.squidTransactionStatus}`);
-    } catch (error: any) {
-      if (error.response && error.response.status === 404) {
-        retryCount++;
-        if (retryCount >= maxRetries) {
-          console.error("Max retries reached. Transaction not found.");
-          break;
-        }
-        console.log("Transaction not found. Retrying in 5 seconds...");
-        await new Promise((resolve) => setTimeout(resolve, 5000));
-        continue;
-      } else {
-        throw error;
-      }
-    }
-
-    if (status && status.squidTransactionStatus && !completedStatuses.includes(status.squidTransactionStatus as string)) {
-      await new Promise((resolve) => setTimeout(resolve, 5000));
-    }
-  } while (!(status && status.squidTransactionStatus && completedStatuses.includes(status.squidTransactionStatus as string)));
-  
-  console.log("Swap fully confirmed on Squid API!");
+const getStatus = async (params: {
+  transactionId: string;
+  requestId?: string;
+  fromChainId: string;
+  toChainId: string;
+  quoteId?: string;
+}, signal: AbortSignal) => {
+  const result = await axios.get<{ squidTransactionStatus?: string }>(
+    "https://v2.api.squidrouter.com/v2/status",
+    { params, headers: { "x-integrator-id": integratorId }, signal }
+  );
+  console.log(`Route status: ${result.data.squidTransactionStatus ?? "unknown"}`);
+  return result.data.squidTransactionStatus;
 };
 
 // Main function
@@ -192,11 +150,19 @@ const updateTransactionStatus = async (txHash: string, requestId: string, quoteI
     const squidScanLink = "https://scan.squidrouter.com/tx/" + txHash;
     console.log(`Check Coralscan for details: ${squidScanLink}`);
 
-    // Update transaction status until it completes, ensuring the quoteId is passed for Coral V2 checks
-    // Note: XRPL native deposits do not depend on depositTxVerificationSignature
-    await updateTransactionStatus(txHash, requestId as string, quoteId);
-
-    // Clean up client connection
-    await xrplClient.disconnect();
+    // Track the route using the source transaction hash and Coral V2 quote ID.
+    // The deadline also cancels a slow status request.
+    try {
+      const outcome = await pollRouteStatus((signal) => getStatus({
+        transactionId: txHash,
+        requestId,
+        fromChainId,
+        toChainId,
+        quoteId: quoteId || requestId,
+      }, signal), AbortSignal.timeout(120_000));
+      console.log(outcome.message);
+    } finally {
+      await xrplClient.disconnect();
+    }
   }
 })();

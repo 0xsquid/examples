@@ -1,6 +1,7 @@
 {
 	"scripts": {
-		"start": "npx ts-node src/index.ts"
+		"start": "npx ts-node src/index.ts",
+		"test": "node --require ts-node/register --test src/pollRouteStatus.test.ts"
 	},
 	"dependencies": {
 		"axios": "^1.6.7",
